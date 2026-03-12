@@ -498,7 +498,7 @@
                     </div>
                 @empty
                     <div class="record-card">
-                        <div class="record-value">No hay registros para mostrar.</div>
+                        <div class="record-value">No hay registros para mostrar en este momento.</div>
                     </div>
                 @endforelse
             </div>
