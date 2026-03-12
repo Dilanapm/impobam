@@ -39,12 +39,13 @@ class StockOutputController extends Controller
             'employee_name' => ['nullable', 'string', 'max:120'],
             'notes' => ['nullable', 'string', 'max:500'],
         ]);
-
+        
         $stockOutput = StockOutput::create([
             'product_id' => $validated['product_id'],
             'quantity' => $validated['quantity'],
             'employee_name' => $validated['employee_name'] ?? null,
             'notes' => $validated['notes'] ?? null,
+            'moved_at' => now(),
         ]);
 
         session([
