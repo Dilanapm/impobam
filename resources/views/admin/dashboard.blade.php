@@ -202,18 +202,17 @@
                                 <td class="px-4 py-4">{{ $output->employee_name ?: '—' }}</td>
                                 <td class="px-4 py-4">{{ $output->notes ?: '—' }}</td>
                                 <td class="px-4 py-4">
-                                    <form method="POST" action="{{ route('admin.stock-outputs.destroy', $output) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button
-                                            type="submit"
-                                            class="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-base font-bold text-white transition hover:bg-red-700"
-                                            onclick="return confirm('¿Eliminar este registro?')"
-                                        >
-                                            <span>🗑️</span>
-                                            <span>Eliminar</span>
-                                        </button>
-                                    </form>
+                                    <button
+                                        type="button"
+                                        class="open-delete-modal inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-base font-bold text-white transition hover:bg-red-700"
+                                        data-action="{{ route('admin.stock-outputs.destroy', $output) }}"
+                                        data-product="{{ $output->product?->name ?? 'Producto no disponible' }}"
+                                        data-quantity="{{ $output->quantity }}"
+                                        data-date="{{ $output->moved_at?->format('d/m/Y H:i') }}"
+                                    >
+                                        <span>🗑️</span>
+                                        <span>Eliminar</span>
+                                    </button>
                                 </td>
                             </tr>
                         @empty
@@ -257,18 +256,17 @@
                             </div>
 
                             <div class="pt-1">
-                                <form method="POST" action="{{ route('admin.stock-outputs.destroy', $output) }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button
-                                        type="submit"
-                                        class="inline-flex min-h-[60px] w-full items-center justify-center gap-3 rounded-2xl bg-red-600 px-4 py-3 text-xl font-bold text-white transition hover:bg-red-700"
-                                        onclick="return confirm('¿Eliminar este registro?')"
-                                    >
-                                        <span class="text-2xl">🗑️</span>
-                                        <span>Eliminar</span>
-                                    </button>
-                                </form>
+                                <button
+                                    type="button"
+                                    class="open-delete-modal inline-flex min-h-[60px] w-full items-center justify-center gap-3 rounded-2xl bg-red-600 px-4 py-3 text-xl font-bold text-white transition hover:bg-red-700"
+                                    data-action="{{ route('admin.stock-outputs.destroy', $output) }}"
+                                    data-product="{{ $output->product?->name ?? 'Producto no disponible' }}"
+                                    data-quantity="{{ $output->quantity }}"
+                                    data-date="{{ $output->moved_at?->format('d/m/Y H:i') }}"
+                                >
+                                    <span class="text-2xl">🗑️</span>
+                                    <span>Eliminar</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -284,6 +282,53 @@
             </div>
         </div>
     </div>
+
+    <x-delete-modal
+        modal-id="deleteModal"
+        cancel-id="cancelDelete"
+        confirm-id="confirmDelete"
+        title="Eliminar registro"
+        subtitle="Revise la información antes de confirmar."
+    />
+
+    <script>
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteModalForm = document.getElementById('deleteModalForm');
+        const cancelDelete = document.getElementById('cancelDelete');
+
+        const deletePreviewProduct = document.getElementById('deletePreviewProduct');
+        const deletePreviewQuantity = document.getElementById('deletePreviewQuantity');
+        const deletePreviewDate = document.getElementById('deletePreviewDate');
+
+        document.querySelectorAll('.open-delete-modal').forEach(button => {
+            button.addEventListener('click', () => {
+                if (!deleteModal || !deleteModalForm || !cancelDelete) {
+                    console.error('No se encontró correctamente el modal de eliminación.');
+                    return;
+                }
+
+                deleteModalForm.action = button.dataset.action;
+                deletePreviewProduct.textContent = button.dataset.product || '—';
+                deletePreviewQuantity.textContent = button.dataset.quantity || '—';
+                deletePreviewDate.textContent = button.dataset.date || '—';
+
+                deleteModal.classList.remove('hidden');
+                deleteModal.classList.add('flex');
+            });
+        });
+
+        cancelDelete.addEventListener('click', () => {
+            deleteModal.classList.add('hidden');
+            deleteModal.classList.remove('flex');
+        });
+
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) {
+                deleteModal.classList.add('hidden');
+                deleteModal.classList.remove('flex');
+            }
+        });
+    </script>
 </body>
 
 </html>
