@@ -19,7 +19,7 @@ class StockOutputController extends Controller
         $recentOutputs = StockOutput::with('product')
             ->latest('moved_at')
             ->latest('id')
-            ->take(10)
+            ->take(5)
             ->get();
 
         $lastOutputId = session('employee_last_output_id');
@@ -52,7 +52,9 @@ class StockOutputController extends Controller
             'employee_last_output_id' => $stockOutput->id,
         ]);
 
-        return back()->with('status', 'Salida registrada correctamente. Si te equivocaste, puedes eliminar solo este último registro.');
+        return redirect()
+            ->route('stock-outputs.create')
+            ->with('status', 'Salida registrada correctamente. Si te equivocaste, puedes eliminar solo este último registro.');
     }
 
     public function destroyOwn(Request $request, StockOutput $stockOutput): RedirectResponse
