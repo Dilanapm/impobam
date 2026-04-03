@@ -1,4 +1,94 @@
+@import url('https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+	:root {
+		--impobam-canvas: 248 250 252;
+		--impobam-surface: 255 255 255;
+		--impobam-muted: 241 245 249;
+		--impobam-border: 226 232 240;
+		--impobam-border-strong: 203 213 225;
+		--impobam-foreground: 30 41 59;
+		--impobam-foreground-muted: 71 85 105;
+
+		--impobam-primary: 37 99 235;
+		--impobam-primary-hover: 29 78 216;
+		--impobam-primary-soft: 239 246 255;
+		--impobam-primary-border: 191 219 254;
+		--impobam-primary-foreground: 255 255 255;
+
+		--impobam-success: 5 150 105;
+		--impobam-success-hover: 4 120 87;
+		--impobam-success-soft: 236 253 245;
+		--impobam-success-border: 167 243 208;
+		--impobam-success-foreground: 255 255 255;
+
+		--impobam-danger: 220 38 38;
+		--impobam-danger-hover: 185 28 28;
+		--impobam-danger-soft: 254 242 242;
+		--impobam-danger-border: 254 202 202;
+		--impobam-danger-foreground: 255 255 255;
+
+		--impobam-accent: 79 70 229;
+		--impobam-accent-hover: 67 56 202;
+		--impobam-accent-soft: 238 242 255;
+		--impobam-accent-border: 199 210 254;
+		--impobam-accent-foreground: 255 255 255;
+
+		--impobam-warning: 217 119 6;
+		--impobam-warning-hover: 180 83 9;
+		--impobam-warning-soft: 255 251 235;
+		--impobam-warning-border: 253 230 138;
+		--impobam-warning-foreground: 17 24 39;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--impobam-canvas: 2 6 23;
+			--impobam-surface: 15 23 42;
+			--impobam-muted: 30 41 59;
+			--impobam-border: 51 65 85;
+			--impobam-border-strong: 71 85 105;
+			--impobam-foreground: 241 245 249;
+			--impobam-foreground-muted: 148 163 184;
+
+			--impobam-primary: 59 130 246;
+			--impobam-primary-hover: 96 165 250;
+			--impobam-primary-soft: 23 37 84;
+			--impobam-primary-border: 30 64 175;
+			--impobam-primary-foreground: 255 255 255;
+
+			--impobam-success: 16 185 129;
+			--impobam-success-hover: 52 211 153;
+			--impobam-success-soft: 2 44 34;
+			--impobam-success-border: 6 95 70;
+			--impobam-success-foreground: 255 255 255;
+
+			--impobam-danger: 239 68 68;
+			--impobam-danger-hover: 248 113 113;
+			--impobam-danger-soft: 69 10 10;
+			--impobam-danger-border: 153 27 27;
+			--impobam-danger-foreground: 255 255 255;
+
+			--impobam-accent: 99 102 241;
+			--impobam-accent-hover: 129 140 248;
+			--impobam-accent-soft: 30 27 75;
+			--impobam-accent-border: 55 48 163;
+			--impobam-accent-foreground: 255 255 255;
+
+			--impobam-warning: 245 158 11;
+			--impobam-warning-hover: 251 191 36;
+			--impobam-warning-soft: 69 26 3;
+			--impobam-warning-border: 146 64 14;
+			--impobam-warning-foreground: 17 24 39;
+		}
+	}
+
+	body {
+		@apply font-sans antialiased bg-canvas text-foreground;
+	}
+}
 

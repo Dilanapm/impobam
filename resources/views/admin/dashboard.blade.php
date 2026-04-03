@@ -8,29 +8,29 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-canvas text-foreground">
     <div class="mx-auto max-w-7xl p-3 sm:p-4">
-        <div class="rounded-3xl bg-white p-4 shadow-lg sm:p-6">
+        <div class="rounded-3xl bg-surface p-4 shadow-lg sm:p-6">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div class="flex items-start gap-3">
-                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-indigo-100 text-3xl">
+                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-accent-soft text-3xl">
                         📊
                     </div>
                     <div>
-                        <h1 class="text-3xl font-extrabold leading-tight text-slate-800 sm:text-4xl">
+                        <h1 class="text-3xl font-extrabold leading-tight text-foreground sm:text-4xl">
                             Panel del administrador
                         </h1>
-                        <p class="mt-2 text-lg text-slate-500 sm:text-xl">
+                        <p class="mt-2 text-lg text-foreground-muted sm:text-xl">
                             Control de salidas registradas por los empleados.
                         </p>
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('logout') }}" class="w-full lg:w-auto">
+                <form method="POST" action="{{ route('logout') }}" class="w-full lg:w-auto" novalidate>
                     @csrf
                     <button
                         type="submit"
-                        class="inline-flex min-h-[56px] w-full items-center justify-center gap-3 rounded-2xl bg-red-600 px-5 py-3 text-lg font-bold text-white transition hover:bg-red-700 lg:w-auto"
+                        class="inline-flex min-h-[56px] w-full items-center justify-center gap-3 rounded-2xl bg-danger px-5 py-3 text-lg font-bold text-danger-foreground transition hover:bg-danger-hover lg:w-auto"
                     >
                         <span class="text-2xl">🚪</span>
                         <span>Cerrar sesión</span>
@@ -40,75 +40,75 @@
         </div>
 
         @if (session('status'))
-            <div class="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-lg font-medium text-emerald-800 sm:text-xl">
+            <div class="mt-5 rounded-2xl border border-success-border bg-success-soft px-4 py-4 text-lg font-medium text-success sm:text-xl">
                 ✅ {{ session('status') }}
             </div>
         @endif
 
         <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-2xl bg-white p-5 shadow-md">
+            <div class="rounded-2xl bg-surface p-5 shadow-md">
                 <div class="flex items-center gap-3">
                     <span class="text-3xl">📋</span>
                     <div>
-                        <p class="text-base font-semibold text-slate-500">Total de registros</p>
-                        <p class="mt-1 text-3xl font-extrabold text-slate-800 sm:text-4xl">{{ $totalRecords }}</p>
+                        <p class="text-base font-semibold text-foreground-muted">Total de registros</p>
+                        <p class="mt-1 text-3xl font-extrabold text-foreground sm:text-4xl">{{ $totalRecords }}</p>
                     </div>
                 </div>
             </div>
 
-            <div class="rounded-2xl bg-white p-5 shadow-md">
+            <div class="rounded-2xl bg-surface p-5 shadow-md">
                 <div class="flex items-center gap-3">
                     <span class="text-3xl">📦</span>
                     <div>
-                        <p class="text-base font-semibold text-slate-500">Unidades retiradas</p>
-                        <p class="mt-1 text-3xl font-extrabold text-slate-800 sm:text-4xl">{{ $totalUnits }}</p>
+                        <p class="text-base font-semibold text-foreground-muted">Unidades retiradas</p>
+                        <p class="mt-1 text-3xl font-extrabold text-foreground sm:text-4xl">{{ $totalUnits }}</p>
                     </div>
                 </div>
             </div>
 
-            <div class="rounded-2xl bg-white p-5 shadow-md">
+            <div class="rounded-2xl bg-surface p-5 shadow-md">
                 <div class="flex items-center gap-3">
                     <span class="text-3xl">📅</span>
                     <div>
-                        <p class="text-base font-semibold text-slate-500">Registros de hoy</p>
-                        <p class="mt-1 text-3xl font-extrabold text-slate-800 sm:text-4xl">{{ $todayRecords }}</p>
+                        <p class="text-base font-semibold text-foreground-muted">Registros de hoy</p>
+                        <p class="mt-1 text-3xl font-extrabold text-foreground sm:text-4xl">{{ $todayRecords }}</p>
                     </div>
                 </div>
             </div>
 
-            <div class="rounded-2xl bg-white p-5 shadow-md">
+            <div class="rounded-2xl bg-surface p-5 shadow-md">
                 <div class="flex items-center gap-3">
                     <span class="text-3xl">⏱️</span>
                     <div>
-                        <p class="text-base font-semibold text-slate-500">Unidades hoy</p>
-                        <p class="mt-1 text-3xl font-extrabold text-slate-800 sm:text-4xl">{{ $todayUnits }}</p>
+                        <p class="text-base font-semibold text-foreground-muted">Unidades hoy</p>
+                        <p class="mt-1 text-3xl font-extrabold text-foreground sm:text-4xl">{{ $todayUnits }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="mt-5 rounded-3xl bg-white p-4 shadow-lg sm:p-6">
+        <div class="mt-5 rounded-3xl bg-surface p-4 shadow-lg sm:p-6">
             <div class="flex items-center gap-3">
                 <span class="text-3xl">🔎</span>
-                <h2 class="text-2xl font-extrabold text-slate-800 sm:text-3xl">
+                <h2 class="text-2xl font-extrabold text-foreground sm:text-3xl">
                     Filtros
                 </h2>
             </div>
 
-            <p class="mt-2 text-lg text-slate-500 sm:text-xl">
+            <p class="mt-2 text-lg text-foreground-muted sm:text-xl">
                 Use estos filtros para buscar registros específicos.
             </p>
 
-            <form method="GET" action="{{ route('dashboard') }}" class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-5">
+            <form method="GET" action="{{ route('dashboard') }}" class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-5" novalidate>
                 <div>
-                    <label for="product_id" class="mb-2 flex items-center gap-2 text-lg font-bold text-slate-700">
+                    <label for="product_id" class="mb-2 flex items-center gap-2 text-lg font-bold text-foreground">
                         <span>🧴</span>
                         <span>Producto</span>
                     </label>
                     <select
                         name="product_id"
                         id="product_id"
-                        class="min-h-[56px] w-full rounded-2xl border-2 border-slate-300 bg-white px-4 py-3 text-lg shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-200"
+                        class="min-h-[56px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-3 text-lg shadow-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/20"
                     >
                         <option value="">Todos</option>
                         @foreach ($products as $product)
@@ -120,7 +120,7 @@
                 </div>
 
                 <div>
-                    <label for="start_date" class="mb-2 flex items-center gap-2 text-lg font-bold text-slate-700">
+                    <label for="start_date" class="mb-2 flex items-center gap-2 text-lg font-bold text-foreground">
                         <span>📆</span>
                         <span>Desde</span>
                     </label>
@@ -129,12 +129,12 @@
                         name="start_date"
                         id="start_date"
                         value="{{ request('start_date') }}"
-                        class="min-h-[56px] w-full rounded-2xl border-2 border-slate-300 bg-white px-4 py-3 text-lg shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-200"
+                        class="min-h-[56px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-3 text-lg shadow-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/20"
                     >
                 </div>
 
                 <div>
-                    <label for="end_date" class="mb-2 flex items-center gap-2 text-lg font-bold text-slate-700">
+                    <label for="end_date" class="mb-2 flex items-center gap-2 text-lg font-bold text-foreground">
                         <span>📆</span>
                         <span>Hasta</span>
                     </label>
@@ -143,14 +143,14 @@
                         name="end_date"
                         id="end_date"
                         value="{{ request('end_date') }}"
-                        class="min-h-[56px] w-full rounded-2xl border-2 border-slate-300 bg-white px-4 py-3 text-lg shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-200"
+                        class="min-h-[56px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-3 text-lg shadow-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/20"
                     >
                 </div>
 
                 <div class="flex items-end">
                     <button
                         type="submit"
-                        class="inline-flex min-h-[56px] w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-lg font-bold text-white transition hover:bg-blue-700"
+                        class="inline-flex min-h-[56px] w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-lg font-bold text-primary-foreground transition hover:bg-primary-hover"
                     >
                         <span>🔍</span>
                         <span>Filtrar</span>
@@ -160,7 +160,7 @@
                 <div class="flex items-end">
                     <a
                         href="{{ route('dashboard') }}"
-                        class="inline-flex min-h-[56px] w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-lg font-bold text-slate-700 transition hover:bg-slate-200"
+                        class="inline-flex min-h-[56px] w-full items-center justify-center gap-2 rounded-2xl bg-muted px-4 py-3 text-lg font-bold text-foreground transition hover:bg-border"
                     >
                         <span>🧹</span>
                         <span>Limpiar</span>
@@ -169,22 +169,22 @@
             </form>
         </div>
 
-        <div class="mt-5 rounded-3xl bg-white p-4 shadow-lg sm:p-6">
+        <div class="mt-5 rounded-3xl bg-surface p-4 shadow-lg sm:p-6">
             <div class="flex items-center gap-3">
                 <span class="text-3xl">🗂️</span>
-                <h2 class="text-2xl font-extrabold text-slate-800 sm:text-3xl">
+                <h2 class="text-2xl font-extrabold text-foreground sm:text-3xl">
                     Historial de salidas
                 </h2>
             </div>
 
-            <p class="mt-2 text-lg text-slate-500 sm:text-xl">
+            <p class="mt-2 text-lg text-foreground-muted sm:text-xl">
                 Revise los registros guardados y elimine si es necesario.
             </p>
 
             <div class="mt-5 hidden overflow-x-auto xl:block">
                 <table class="min-w-[1050px] w-full border-collapse overflow-hidden rounded-2xl">
                     <thead>
-                        <tr class="bg-slate-100 text-left text-base font-bold text-slate-700">
+                        <tr class="bg-muted text-left text-base font-bold text-foreground">
                             <th class="px-4 py-4">📅 Fecha</th>
                             <th class="px-4 py-4">🧴 Producto</th>
                             <th class="px-4 py-4">🔢 Cantidad</th>
@@ -193,9 +193,9 @@
                             <th class="px-4 py-4">🗑️ Acción</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white text-base text-slate-700">
+                    <tbody class="bg-surface text-base text-foreground">
                         @forelse($outputs as $output)
-                            <tr class="border-b border-slate-200 align-top">
+                            <tr class="border-b border-border align-top">
                                 <td class="px-4 py-4">{{ $output->moved_at?->format('d/m/Y H:i') }}</td>
                                 <td class="px-4 py-4">{{ $output->product?->name ?? 'Producto no disponible' }}</td>
                                 <td class="px-4 py-4">{{ $output->quantity }}</td>
@@ -204,7 +204,7 @@
                                 <td class="px-4 py-4">
                                     <button
                                         type="button"
-                                        class="open-delete-modal inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-base font-bold text-white transition hover:bg-red-700"
+                                        class="open-delete-modal inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-danger px-4 py-3 text-base font-bold text-danger-foreground transition hover:bg-danger-hover"
                                         data-action="{{ route('admin.stock-outputs.destroy', $output) }}"
                                         data-product="{{ $output->product?->name ?? 'Producto no disponible' }}"
                                         data-quantity="{{ $output->quantity }}"
@@ -217,7 +217,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-4 py-6 text-center text-lg text-slate-500">
+                                <td colspan="6" class="px-4 py-6 text-center text-lg text-foreground-muted">
                                     No hay registros para mostrar.
                                 </td>
                             </tr>
@@ -228,37 +228,37 @@
 
             <div class="mt-5 space-y-4 xl:hidden">
                 @forelse($outputs as $output)
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm sm:p-5">
+                    <div class="rounded-2xl border border-border bg-muted p-4 shadow-sm sm:p-5">
                         <div class="space-y-4">
                             <div>
-                                <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-slate-500">📅 Fecha</span>
-                                <span class="text-lg font-medium text-slate-800 sm:text-xl">{{ $output->moved_at?->format('d/m/Y H:i') }}</span>
+                                <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">📅 Fecha</span>
+                                <span class="text-lg font-medium text-foreground sm:text-xl">{{ $output->moved_at?->format('d/m/Y H:i') }}</span>
                             </div>
 
                             <div>
-                                <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-slate-500">🧴 Producto</span>
-                                <span class="text-lg font-medium text-slate-800 sm:text-xl">{{ $output->product?->name ?? 'Producto no disponible' }}</span>
+                                <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">🧴 Producto</span>
+                                <span class="text-lg font-medium text-foreground sm:text-xl">{{ $output->product?->name ?? 'Producto no disponible' }}</span>
                             </div>
 
                             <div>
-                                <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-slate-500">🔢 Cantidad</span>
-                                <span class="text-lg font-medium text-slate-800 sm:text-xl">{{ $output->quantity }}</span>
+                                <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">🔢 Cantidad</span>
+                                <span class="text-lg font-medium text-foreground sm:text-xl">{{ $output->quantity }}</span>
                             </div>
 
                             <div>
-                                <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-slate-500">👤 Empleado</span>
-                                <span class="text-lg font-medium text-slate-800 sm:text-xl">{{ $output->employee_name ?: '—' }}</span>
+                                <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">👤 Empleado</span>
+                                <span class="text-lg font-medium text-foreground sm:text-xl">{{ $output->employee_name ?: '—' }}</span>
                             </div>
 
                             <div>
-                                <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-slate-500">📝 Observación</span>
-                                <span class="text-lg font-medium text-slate-800 sm:text-xl">{{ $output->notes ?: '—' }}</span>
+                                <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">📝 Observación</span>
+                                <span class="text-lg font-medium text-foreground sm:text-xl">{{ $output->notes ?: '—' }}</span>
                             </div>
 
                             <div class="pt-1">
                                 <button
                                     type="button"
-                                    class="open-delete-modal inline-flex min-h-[60px] w-full items-center justify-center gap-3 rounded-2xl bg-red-600 px-4 py-3 text-xl font-bold text-white transition hover:bg-red-700"
+                                    class="open-delete-modal inline-flex min-h-[60px] w-full items-center justify-center gap-3 rounded-2xl bg-danger px-4 py-3 text-xl font-bold text-danger-foreground transition hover:bg-danger-hover"
                                     data-action="{{ route('admin.stock-outputs.destroy', $output) }}"
                                     data-product="{{ $output->product?->name ?? 'Producto no disponible' }}"
                                     data-quantity="{{ $output->quantity }}"
@@ -271,7 +271,7 @@
                         </div>
                     </div>
                 @empty
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-lg text-slate-500 shadow-sm">
+                    <div class="rounded-2xl border border-border bg-muted p-4 text-lg text-foreground-muted shadow-sm">
                         No hay registros para mostrar en este momento.
                     </div>
                 @endforelse
