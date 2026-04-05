@@ -4,6 +4,13 @@
     'subtitle' => 'Esta acción no se puede deshacer.',
     'cancelId' => 'cancelDelete',
     'confirmId' => 'confirmDelete',
+    'formId' => 'deleteModalForm',
+    'firstLabel' => 'Producto',
+    'firstId' => 'deletePreviewProduct',
+    'secondLabel' => 'Cantidad',
+    'secondId' => 'deletePreviewQuantity',
+    'thirdLabel' => 'Fecha',
+    'thirdId' => 'deletePreviewDate',
 ])
 
 <div
@@ -30,23 +37,23 @@
 
             <div class="mt-4 space-y-3 rounded-2xl border border-border bg-surface p-4">
                 <div>
-                    <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">Producto</span>
-                    <p id="deletePreviewProduct" class="text-xl font-semibold text-foreground sm:text-2xl">—</p>
+                    <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">{{ $firstLabel }}</span>
+                    <p id="{{ $firstId }}" class="text-xl font-semibold text-foreground sm:text-2xl">—</p>
                 </div>
 
                 <div>
-                    <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">Cantidad</span>
-                    <p id="deletePreviewQuantity" class="text-xl font-semibold text-foreground sm:text-2xl">—</p>
+                    <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">{{ $secondLabel }}</span>
+                    <p id="{{ $secondId }}" class="text-xl font-semibold text-foreground sm:text-2xl">—</p>
                 </div>
 
                 <div>
-                    <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">Fecha</span>
-                    <p id="deletePreviewDate" class="text-xl font-semibold text-foreground sm:text-2xl">—</p>
+                    <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">{{ $thirdLabel }}</span>
+                    <p id="{{ $thirdId }}" class="text-xl font-semibold text-foreground sm:text-2xl">—</p>
                 </div>
             </div>
         </div>
 
-        <form id="deleteModalForm" method="POST" class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2" novalidate>
+        <form id="{{ $formId }}" method="POST" class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2" novalidate>
             @csrf
             @method('DELETE')
 

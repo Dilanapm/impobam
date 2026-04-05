@@ -281,6 +281,149 @@
                 {{ $outputs->links() }}
             </div>
         </div>
+
+        @php
+            $formatCents = fn(int $cents) => number_format($cents / 100, 2, '.', '');
+        @endphp
+
+        <div class="mt-5 rounded-3xl bg-surface p-4 shadow-lg sm:p-6">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl">🧾</span>
+                <h2 class="text-2xl font-extrabold text-foreground sm:text-3xl">
+                    Historial de ventas
+                </h2>
+            </div>
+
+            <p class="mt-2 text-lg text-foreground-muted sm:text-xl">
+                Revise las ventas registradas y elimine si es necesario.
+            </p>
+
+            <div class="mt-5 hidden overflow-x-auto xl:block">
+                <table class="min-w-[1250px] w-full border-collapse overflow-hidden rounded-2xl">
+                    <thead>
+                        <tr class="bg-muted text-left text-base font-bold text-foreground">
+                            <th class="px-4 py-4">📅 Fecha</th>
+                            <th class="px-4 py-4">🧾 Venta</th>
+                            <th class="px-4 py-4">👤 Cliente</th>
+                            <th class="px-4 py-4">🧾 Total</th>
+                            <th class="px-4 py-4">💳 Pagado</th>
+                            <th class="px-4 py-4">⏳ Saldo</th>
+                            <th class="px-4 py-4">📅 Promesa</th>
+                            <th class="px-4 py-4">🗑️ Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-surface text-base text-foreground">
+                        @forelse($sales as $row)
+                            @php
+                                /** @var \App\Models\Sale $sale */
+                                $sale = $row['sale'];
+                            @endphp
+                            <tr class="border-b border-border align-top">
+                                <td class="px-4 py-4">{{ $sale->created_at?->format('d/m/Y H:i') }}</td>
+                                <td class="px-4 py-4">#{{ $sale->id }}</td>
+                                <td class="px-4 py-4">{{ $sale->customer_name }}</td>
+                                <td class="px-4 py-4">{{ $formatCents($row['totalCents']) }}</td>
+                                <td class="px-4 py-4">{{ $formatCents($row['paidCents']) }}</td>
+                                <td class="px-4 py-4">{{ $formatCents($row['balanceCents']) }}</td>
+                                <td class="px-4 py-4">{{ $sale->due_date?->format('d/m/Y') ?? '—' }}</td>
+                                <td class="px-4 py-4">
+                                    <button
+                                        type="button"
+                                        class="open-delete-sale-modal inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-danger px-4 py-3 text-base font-bold text-danger-foreground transition hover:bg-danger-hover"
+                                        data-action="{{ route('admin.sales.destroy', $sale) }}"
+                                        data-sale="#{{ $sale->id }}"
+                                        data-customer="{{ $sale->customer_name }}"
+                                        data-total="{{ $formatCents($row['totalCents']) }}"
+                                        data-date="{{ $sale->created_at?->format('d/m/Y H:i') }}"
+                                    >
+                                        <span>🗑️</span>
+                                        <span>Eliminar</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="px-4 py-6 text-center text-lg text-foreground-muted">
+                                    No hay ventas para mostrar.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-5 space-y-4 xl:hidden">
+                @forelse($sales as $row)
+                    @php
+                        /** @var \App\Models\Sale $sale */
+                        $sale = $row['sale'];
+                    @endphp
+                    <div class="rounded-2xl border border-border bg-muted p-4 shadow-sm sm:p-5">
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">📅 Fecha</span>
+                                    <span class="text-lg font-medium text-foreground sm:text-xl">{{ $sale->created_at?->format('d/m/Y H:i') }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">🧾 Venta</span>
+                                    <span class="text-lg font-medium text-foreground sm:text-xl">#{{ $sale->id }}</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">👤 Cliente</span>
+                                <span class="text-lg font-medium text-foreground sm:text-xl">{{ $sale->customer_name }}</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                <div>
+                                    <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">🧾 Total</span>
+                                    <span class="text-lg font-extrabold text-foreground sm:text-xl">{{ $formatCents($row['totalCents']) }}</span>
+                                </div>
+                                <div>
+                                    <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">💳 Pagado</span>
+                                    <span class="text-lg font-extrabold text-foreground sm:text-xl">{{ $formatCents($row['paidCents']) }}</span>
+                                </div>
+                                <div>
+                                    <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">⏳ Saldo</span>
+                                    <span class="text-lg font-extrabold text-foreground sm:text-xl">{{ $formatCents($row['balanceCents']) }}</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">📅 Promesa</span>
+                                <span class="text-lg font-medium text-foreground sm:text-xl">{{ $sale->due_date?->format('d/m/Y') ?? '—' }}</span>
+                            </div>
+
+                            <div class="pt-1">
+                                <button
+                                    type="button"
+                                    class="open-delete-sale-modal inline-flex min-h-[60px] w-full items-center justify-center gap-3 rounded-2xl bg-danger px-4 py-3 text-xl font-bold text-danger-foreground transition hover:bg-danger-hover"
+                                    data-action="{{ route('admin.sales.destroy', $sale) }}"
+                                    data-sale="#{{ $sale->id }}"
+                                    data-customer="{{ $sale->customer_name }}"
+                                    data-total="{{ $formatCents($row['totalCents']) }}"
+                                    data-date="{{ $sale->created_at?->format('d/m/Y H:i') }}"
+                                >
+                                    <span class="text-2xl">🗑️</span>
+                                    <span>Eliminar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="rounded-2xl border border-border bg-muted p-4 text-lg text-foreground-muted shadow-sm">
+                        No hay ventas para mostrar en este momento.
+                    </div>
+                @endforelse
+            </div>
+
+            <div class="mt-6 overflow-x-auto">
+                {{ $sales->links() }}
+            </div>
+        </div>
     </div>
 
     <x-delete-modal
@@ -289,6 +432,21 @@
         confirm-id="confirmDelete"
         title="Eliminar registro"
         subtitle="Revise la información antes de confirmar."
+    />
+
+    <x-delete-modal
+        modal-id="deleteSaleModal"
+        form-id="deleteSaleModalForm"
+        cancel-id="cancelDeleteSale"
+        confirm-id="confirmDeleteSale"
+        title="Eliminar venta"
+        subtitle="Revise la información antes de confirmar."
+        first-label="Venta"
+        first-id="deleteSalePreviewSale"
+        second-label="Total"
+        second-id="deleteSalePreviewTotal"
+        third-label="Fecha"
+        third-id="deleteSalePreviewDate"
     />
 
     <script>
@@ -326,6 +484,46 @@
             if (e.target === deleteModal) {
                 deleteModal.classList.add('hidden');
                 deleteModal.classList.remove('flex');
+            }
+        });
+
+        const deleteSaleModal = document.getElementById('deleteSaleModal');
+        const deleteSaleModalForm = document.getElementById('deleteSaleModalForm');
+        const cancelDeleteSale = document.getElementById('cancelDeleteSale');
+
+        const deleteSalePreviewSale = document.getElementById('deleteSalePreviewSale');
+        const deleteSalePreviewTotal = document.getElementById('deleteSalePreviewTotal');
+        const deleteSalePreviewDate = document.getElementById('deleteSalePreviewDate');
+
+        document.querySelectorAll('.open-delete-sale-modal').forEach(button => {
+            button.addEventListener('click', () => {
+                if (!deleteSaleModal || !deleteSaleModalForm || !cancelDeleteSale) {
+                    console.error('No se encontró correctamente el modal de eliminación de ventas.');
+                    return;
+                }
+
+                const sale = button.dataset.sale || '—';
+                const customer = button.dataset.customer || '—';
+
+                deleteSaleModalForm.action = button.dataset.action;
+                deleteSalePreviewSale.textContent = `${sale} — ${customer}`;
+                deleteSalePreviewTotal.textContent = button.dataset.total || '—';
+                deleteSalePreviewDate.textContent = button.dataset.date || '—';
+
+                deleteSaleModal.classList.remove('hidden');
+                deleteSaleModal.classList.add('flex');
+            });
+        });
+
+        cancelDeleteSale?.addEventListener('click', () => {
+            deleteSaleModal?.classList.add('hidden');
+            deleteSaleModal?.classList.remove('flex');
+        });
+
+        deleteSaleModal?.addEventListener('click', (e) => {
+            if (e.target === deleteSaleModal) {
+                deleteSaleModal.classList.add('hidden');
+                deleteSaleModal.classList.remove('flex');
             }
         });
     </script>

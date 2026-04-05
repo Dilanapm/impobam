@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\Sale;
 use App\Models\StockOutput;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,13 +44,35 @@ class DashboardController extends Controller
         $todayRecords = StockOutput::whereDate('moved_at', today())->count();
         $todayUnits = StockOutput::whereDate('moved_at', today())->sum('quantity');
 
+        $sales = Sale::query()
+            ->select(['id', 'customer_name', 'delivery_location', 'due_date', 'total_amount', 'created_at'])
+            ->withSum('payments', 'amount')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->paginate(15, ['*'], 'sales_page')
+            ->withQueryString();
+
+        $sales->getCollection()->transform(function (Sale $sale) {
+            $totalCents = $this->moneyToCents($sale->total_amount);
+            $paidCents = $this->moneyToCents($sale->payments_sum_amount ?? 0);
+            $balanceCents = max($totalCents - $paidCents, 0);
+
+            return [
+                'sale' => $sale,
+                'totalCents' => $totalCents,
+                'paidCents' => $paidCents,
+                'balanceCents' => $balanceCents,
+            ];
+        });
+
         return view('admin.dashboard', compact(
             'outputs',
             'products',
             'totalRecords',
             'totalUnits',
             'todayRecords',
-            'todayUnits'
+            'todayUnits',
+            'sales'
         ));
     }
 
@@ -60,5 +83,33 @@ class DashboardController extends Controller
         return redirect()
             ->route('dashboard')
             ->with('status', 'Registro eliminado correctamente.');
+    }
+
+    public function destroySale(Sale $sale): RedirectResponse
+    {
+        $sale->delete();
+
+        return redirect()
+            ->route('dashboard')
+            ->with('status', 'Venta eliminada correctamente.');
+    }
+
+    private function moneyToCents(mixed $value): int
+    {
+        if ($value === null || $value === '') {
+            return 0;
+        }
+
+        $normalized = str_replace(',', '.', (string) $value);
+
+        if (! str_contains($normalized, '.')) {
+            return ((int) $normalized) * 100;
+        }
+
+        [$whole, $decimals] = explode('.', $normalized, 2);
+        $wholePart = (int) $whole;
+        $decimalPart = (int) str_pad(substr($decimals, 0, 2), 2, '0');
+
+        return ($wholePart * 100) + $decimalPart;
     }
 }

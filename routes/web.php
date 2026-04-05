@@ -24,6 +24,8 @@ Route::middleware('auth')->group(function () {
    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
    Route::delete('/dashboard/salidas/{stockOutput}', [DashboardController::class, 'destroy'])
         ->name('admin.stock-outputs.destroy');
+   Route::delete('/dashboard/ventas/{sale}', [DashboardController::class, 'destroySale'])
+       ->name('admin.sales.destroy');
 });
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
