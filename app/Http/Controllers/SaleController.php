@@ -100,10 +100,10 @@ class SaleController extends Controller
                 ->withErrors(['initial_payment_amount' => 'El pago inicial no puede ser mayor al total.']);
         }
 
-        if ($initialPaymentCents < $totalCents && empty($validated['due_date'])) {
+        if ($initialPaymentCents > 0 && $initialPaymentCents < $totalCents && empty($validated['due_date'])) {
             return back()
                 ->withInput()
-                ->withErrors(['due_date' => 'Ingrese una fecha prometida si queda saldo pendiente.']);
+                ->withErrors(['due_date' => 'Ingrese una fecha prometida si queda saldo pendiente y hubo un pago inicial.']);
         }
 
         $sale = DB::transaction(function () use ($validated, $normalizedItems, $totalCents, $initialPaymentCents) {

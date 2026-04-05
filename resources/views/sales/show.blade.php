@@ -32,12 +32,14 @@
                 </div>
             @endif
 
-            @if ($errors->any())
-                <div
-                    class="mt-5 rounded-2xl border border-danger-border bg-danger-soft px-4 py-4 text-lg font-medium leading-relaxed text-danger sm:text-xl">
-                    ⚠️ Revise los campos marcados.
-                </div>
-            @endif
+            <div class="mt-5 flex justify-end">
+                <a href="{{ route('home') }}"
+                    class="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-2xl bg-muted px-5 py-3 text-lg font-bold text-foreground transition hover:bg-border">
+                    <span class="text-2xl">🏠</span>
+                    <span>Inicio</span>
+                </a>
+            </div>
+
         </div>
 
         @php

@@ -37,13 +37,13 @@ class SalesTest extends TestCase
         $this->assertSame('10.00', $sale->payments->first()->amount);
     }
 
-    public function test_due_date_is_required_when_balance_remains(): void
+    public function test_due_date_is_required_when_partial_payment_is_provided(): void
     {
         $productA = Product::create(['name' => 'Producto A', 'is_active' => true]);
 
         $response = $this->from('/ventas')->post('/ventas', [
             'customer_name' => 'Cliente 1',
-            'initial_payment_amount' => '0',
+            'initial_payment_amount' => '1.00',
             'items' => [
                 ['product_id' => $productA->id, 'quantity' => 1, 'unit_price' => '5.00'],
             ],
@@ -51,6 +51,23 @@ class SalesTest extends TestCase
 
         $response->assertRedirect('/ventas');
         $response->assertSessionHasErrors(['due_date']);
+    }
+
+    public function test_due_date_is_optional_when_no_payment_is_provided(): void
+    {
+        $productA = Product::create(['name' => 'Producto A', 'is_active' => true]);
+
+        $response = $this->post('/ventas', [
+            'customer_name' => 'Cliente 1',
+            'items' => [
+                ['product_id' => $productA->id, 'quantity' => 1, 'unit_price' => '5.00'],
+            ],
+        ]);
+
+        $sale = Sale::query()->firstOrFail();
+
+        $response->assertRedirect(route('sales.show', $sale));
+        $this->assertNull($sale->due_date);
     }
 
     public function test_due_date_cannot_be_in_the_past(): void
