@@ -101,7 +101,7 @@
                     </div>
                 @empty
                     <div class="rounded-2xl border border-border bg-muted p-4 text-lg text-foreground-muted shadow-sm">
-                        No hay créditos/pagos pendientes.
+                        {{ $creditsLoadError ?? 'No hay créditos/pagos pendientes.' }}
                     </div>
                 @endforelse
             </div>

@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Sale;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -22,33 +23,38 @@ class SaleController extends Controller
 
     public function credits(): View
     {
-        $sales = Sale::query()
-            ->select(['id', 'customer_name', 'delivery_location', 'due_date', 'total_amount', 'created_at'])
-            ->withSum('payments', 'amount')
-            ->orderBy('due_date')
-            ->orderByDesc('id')
-            ->get();
-
         $pendingSales = [];
+        $creditsLoadError = null;
 
-        foreach ($sales as $sale) {
-            $totalCents = $this->moneyToCents($sale->total_amount);
-            $paidCents = $this->moneyToCents($sale->payments_sum_amount ?? 0);
-            $balanceCents = max($totalCents - $paidCents, 0);
+        try {
+            $sales = Sale::query()
+                ->select(['id', 'customer_name', 'delivery_location', 'due_date', 'total_amount', 'created_at'])
+                ->withSum('payments', 'amount')
+                ->orderBy('due_date')
+                ->orderByDesc('id')
+                ->get();
 
-            if ($balanceCents <= 0) {
-                continue;
+            foreach ($sales as $sale) {
+                $totalCents = $this->moneyToCents($sale->total_amount);
+                $paidCents = $this->moneyToCents($sale->payments_sum_amount ?? 0);
+                $balanceCents = max($totalCents - $paidCents, 0);
+
+                if ($balanceCents <= 0) {
+                    continue;
+                }
+
+                $pendingSales[] = [
+                    'sale' => $sale,
+                    'totalCents' => $totalCents,
+                    'paidCents' => $paidCents,
+                    'balanceCents' => $balanceCents,
+                ];
             }
-
-            $pendingSales[] = [
-                'sale' => $sale,
-                'totalCents' => $totalCents,
-                'paidCents' => $paidCents,
-                'balanceCents' => $balanceCents,
-            ];
+        } catch (QueryException) {
+            $creditsLoadError = 'No se pudieron cargar los créditos. Revise la conexión a la base de datos y ejecute las migraciones si es un servidor nuevo.';
         }
 
-        return view('credits.index', compact('pendingSales'));
+        return view('credits.index', compact('pendingSales', 'creditsLoadError'));
     }
 
     public function store(Request $request): RedirectResponse
