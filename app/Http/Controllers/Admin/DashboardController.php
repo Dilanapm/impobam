@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\StockOutput;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -44,26 +46,43 @@ class DashboardController extends Controller
         $todayRecords = StockOutput::whereDate('moved_at', today())->count();
         $todayUnits = StockOutput::whereDate('moved_at', today())->sum('quantity');
 
-        $sales = Sale::query()
-            ->select(['id', 'customer_name', 'delivery_location', 'due_date', 'total_amount', 'created_at'])
-            ->withSum('payments', 'amount')
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->paginate(15, ['*'], 'sales_page')
-            ->withQueryString();
+        $salesLoadError = null;
 
-        $sales->getCollection()->transform(function (Sale $sale) {
-            $totalCents = $this->moneyToCents($sale->total_amount);
-            $paidCents = $this->moneyToCents($sale->payments_sum_amount ?? 0);
-            $balanceCents = max($totalCents - $paidCents, 0);
+        try {
+            $sales = Sale::query()
+                ->select(['id', 'customer_name', 'delivery_location', 'due_date', 'total_amount', 'created_at'])
+                ->withSum('payments', 'amount')
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->paginate(15, ['*'], 'sales_page')
+                ->withQueryString();
 
-            return [
-                'sale' => $sale,
-                'totalCents' => $totalCents,
-                'paidCents' => $paidCents,
-                'balanceCents' => $balanceCents,
-            ];
-        });
+            $sales->getCollection()->transform(function (Sale $sale) {
+                $totalCents = $this->moneyToCents($sale->total_amount);
+                $paidCents = $this->moneyToCents($sale->payments_sum_amount ?? 0);
+                $balanceCents = max($totalCents - $paidCents, 0);
+
+                return [
+                    'sale' => $sale,
+                    'totalCents' => $totalCents,
+                    'paidCents' => $paidCents,
+                    'balanceCents' => $balanceCents,
+                ];
+            });
+        } catch (QueryException) {
+            $salesLoadError = 'No se pudieron cargar las ventas. Revise la conexión a la base de datos y ejecute las migraciones si es un servidor nuevo.';
+            $sales = new LengthAwarePaginator(
+                [],
+                0,
+                15,
+                1,
+                [
+                    'path' => $request->url(),
+                    'query' => $request->query(),
+                    'pageName' => 'sales_page',
+                ]
+            );
+        }
 
         return view('admin.dashboard', compact(
             'outputs',
@@ -72,7 +91,8 @@ class DashboardController extends Controller
             'totalUnits',
             'todayRecords',
             'todayUnits',
-            'sales'
+            'sales',
+            'salesLoadError'
         ));
     }
 

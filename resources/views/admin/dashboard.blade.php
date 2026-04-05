@@ -344,7 +344,7 @@
                         @empty
                             <tr>
                                 <td colspan="8" class="px-4 py-6 text-center text-lg text-foreground-muted">
-                                    No hay ventas para mostrar.
+                                    {{ $salesLoadError ?? 'No hay ventas para mostrar.' }}
                                 </td>
                             </tr>
                         @endforelse
@@ -415,14 +415,16 @@
                     </div>
                 @empty
                     <div class="rounded-2xl border border-border bg-muted p-4 text-lg text-foreground-muted shadow-sm">
-                        No hay ventas para mostrar en este momento.
+                        {{ $salesLoadError ?? 'No hay ventas para mostrar en este momento.' }}
                     </div>
                 @endforelse
             </div>
 
-            <div class="mt-6 overflow-x-auto">
-                {{ $sales->links() }}
-            </div>
+            @if (empty($salesLoadError))
+                <div class="mt-6 overflow-x-auto">
+                    {{ $sales->links() }}
+                </div>
+            @endif
         </div>
     </div>
 
