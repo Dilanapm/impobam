@@ -89,6 +89,147 @@
 
         <div class="mt-5 rounded-3xl bg-surface p-4 shadow-lg sm:p-6">
             <div class="flex items-center gap-3">
+                <span class="text-3xl">🧾</span>
+                <h2 class="text-2xl font-extrabold text-foreground sm:text-3xl">
+                    Reportes (PDF)
+                </h2>
+            </div>
+
+            <p class="mt-2 text-lg text-foreground-muted sm:text-xl">
+                Descargue un reporte entendible con resumen y detalle.
+            </p>
+
+            <div class="mt-5 space-y-4">
+                <div class="rounded-2xl border border-border bg-muted p-4">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="text-xl font-extrabold text-foreground sm:text-2xl">💰 Ventas</div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <a href="{{ route('admin.reports.sales', ['range' => 'hoy']) }}"
+                                class="inline-flex min-h-[52px] items-center justify-center rounded-2xl bg-success px-4 py-2 text-base font-bold text-success-foreground transition hover:bg-success-hover">
+                                Hoy
+                            </a>
+                            <a href="{{ route('admin.reports.sales', ['range' => 'semana']) }}"
+                                class="inline-flex min-h-[52px] items-center justify-center rounded-2xl bg-success px-4 py-2 text-base font-bold text-success-foreground transition hover:bg-success-hover">
+                                Semana
+                            </a>
+                            <a href="{{ route('admin.reports.sales', ['range' => 'mes']) }}"
+                                class="inline-flex min-h-[52px] items-center justify-center rounded-2xl bg-success px-4 py-2 text-base font-bold text-success-foreground transition hover:bg-success-hover">
+                                Mes
+                            </a>
+                        </div>
+                    </div>
+
+                    <form method="GET" action="{{ route('admin.reports.sales') }}" class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3" novalidate>
+                        <div>
+                            <label class="mb-2 block text-base font-bold text-foreground">Desde</label>
+                            <input type="date" name="start_date" value="{{ request('start_date') }}"
+                                class="min-h-[52px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-2 text-base shadow-sm outline-none transition focus:border-success focus:ring-4 focus:ring-success/20">
+                        </div>
+
+                        <div>
+                            <label class="mb-2 block text-base font-bold text-foreground">Hasta</label>
+                            <input type="date" name="end_date" value="{{ request('end_date') }}"
+                                class="min-h-[52px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-2 text-base shadow-sm outline-none transition focus:border-success focus:ring-4 focus:ring-success/20">
+                        </div>
+
+                        <div class="flex items-end">
+                            <button type="submit"
+                                class="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-success px-4 py-2 text-base font-bold text-success-foreground transition hover:bg-success-hover">
+                                <span>📄</span>
+                                <span>Descargar</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="rounded-2xl border border-border bg-muted p-4">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="text-xl font-extrabold text-foreground sm:text-2xl">📦 Salidas</div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <a href="{{ route('admin.reports.outputs', ['range' => 'hoy']) }}"
+                                class="inline-flex min-h-[52px] items-center justify-center rounded-2xl bg-primary px-4 py-2 text-base font-bold text-primary-foreground transition hover:bg-primary-hover">
+                                Hoy
+                            </a>
+                            <a href="{{ route('admin.reports.outputs', ['range' => 'semana']) }}"
+                                class="inline-flex min-h-[52px] items-center justify-center rounded-2xl bg-primary px-4 py-2 text-base font-bold text-primary-foreground transition hover:bg-primary-hover">
+                                Semana
+                            </a>
+                            <a href="{{ route('admin.reports.outputs', ['range' => 'mes']) }}"
+                                class="inline-flex min-h-[52px] items-center justify-center rounded-2xl bg-primary px-4 py-2 text-base font-bold text-primary-foreground transition hover:bg-primary-hover">
+                                Mes
+                            </a>
+                        </div>
+                    </div>
+
+                    <form method="GET" action="{{ route('admin.reports.outputs') }}" class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3" novalidate>
+                        <div>
+                            <label class="mb-2 block text-base font-bold text-foreground">Desde</label>
+                            <input type="date" name="start_date" value="{{ request('start_date') }}"
+                                class="min-h-[52px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-2 text-base shadow-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/20">
+                        </div>
+
+                        <div>
+                            <label class="mb-2 block text-base font-bold text-foreground">Hasta</label>
+                            <input type="date" name="end_date" value="{{ request('end_date') }}"
+                                class="min-h-[52px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-2 text-base shadow-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/20">
+                        </div>
+
+                        <div class="flex items-end">
+                            <button type="submit"
+                                class="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-2 text-base font-bold text-primary-foreground transition hover:bg-primary-hover">
+                                <span>📄</span>
+                                <span>Descargar</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="rounded-2xl border border-border bg-muted p-4">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="text-xl font-extrabold text-foreground sm:text-2xl">💳 Pagos pendientes</div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <a href="{{ route('admin.reports.pending-payments', ['range' => 'hoy']) }}"
+                                class="inline-flex min-h-[52px] items-center justify-center rounded-2xl bg-warning px-4 py-2 text-base font-bold text-warning-foreground transition hover:bg-warning-hover">
+                                Hoy
+                            </a>
+                            <a href="{{ route('admin.reports.pending-payments', ['range' => 'semana']) }}"
+                                class="inline-flex min-h-[52px] items-center justify-center rounded-2xl bg-warning px-4 py-2 text-base font-bold text-warning-foreground transition hover:bg-warning-hover">
+                                Semana
+                            </a>
+                            <a href="{{ route('admin.reports.pending-payments', ['range' => 'mes']) }}"
+                                class="inline-flex min-h-[52px] items-center justify-center rounded-2xl bg-warning px-4 py-2 text-base font-bold text-warning-foreground transition hover:bg-warning-hover">
+                                Mes
+                            </a>
+                        </div>
+                    </div>
+
+                    <form method="GET" action="{{ route('admin.reports.pending-payments') }}" class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3" novalidate>
+                        <div>
+                            <label class="mb-2 block text-base font-bold text-foreground">Desde</label>
+                            <input type="date" name="start_date" value="{{ request('start_date') }}"
+                                class="min-h-[52px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-2 text-base shadow-sm outline-none transition focus:border-warning focus:ring-4 focus:ring-warning/20">
+                        </div>
+
+                        <div>
+                            <label class="mb-2 block text-base font-bold text-foreground">Hasta</label>
+                            <input type="date" name="end_date" value="{{ request('end_date') }}"
+                                class="min-h-[52px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-2 text-base shadow-sm outline-none transition focus:border-warning focus:ring-4 focus:ring-warning/20">
+                        </div>
+
+                        <div class="flex items-end">
+                            <button type="submit"
+                                class="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-warning px-4 py-2 text-base font-bold text-warning-foreground transition hover:bg-warning-hover">
+                                <span>📄</span>
+                                <span>Descargar</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5 rounded-3xl bg-surface p-4 shadow-lg sm:p-6">
+            <div class="flex items-center gap-3">
                 <span class="text-3xl">🔎</span>
                 <h2 class="text-2xl font-extrabold text-foreground sm:text-3xl">
                     Filtros

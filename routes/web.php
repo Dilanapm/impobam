@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StockOutputController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SalePaymentController;
 
@@ -22,6 +23,14 @@ Route::delete('/salidas/{stockOutput}', [StockOutputController::class, 'destroyO
     
 Route::middleware('auth')->group(function () {
    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+   Route::get('/dashboard/reportes/ventas', [ReportController::class, 'sales'])
+       ->name('admin.reports.sales');
+   Route::get('/dashboard/reportes/salidas', [ReportController::class, 'outputs'])
+       ->name('admin.reports.outputs');
+   Route::get('/dashboard/reportes/pagos-pendientes', [ReportController::class, 'pendingPayments'])
+       ->name('admin.reports.pending-payments');
+
    Route::delete('/dashboard/salidas/{stockOutput}', [DashboardController::class, 'destroy'])
         ->name('admin.stock-outputs.destroy');
    Route::delete('/dashboard/ventas/{sale}', [DashboardController::class, 'destroySale'])
