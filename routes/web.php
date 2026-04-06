@@ -6,6 +6,7 @@ use App\Http\Controllers\StockOutputController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\SaleDocumentController;
 use App\Http\Controllers\SalePaymentController;
 
 Route::view('/', 'home')->name('home');
@@ -15,7 +16,9 @@ Route::post('/salidas', [StockOutputController::class, 'store'])->name('stock-ou
 Route::get('/ventas', [SaleController::class, 'create'])->name('sales.create');
 Route::post('/ventas', [SaleController::class, 'store'])->name('sales.store');
 Route::get('/ventas/{sale}', [SaleController::class, 'show'])->name('sales.show');
+Route::get('/ventas/{sale}/nota', [SaleDocumentController::class, 'saleNote'])->name('sales.note');
 Route::post('/ventas/{sale}/pagos', [SalePaymentController::class, 'store'])->name('sales.payments.store');
+Route::get('/ventas/{sale}/pagos/{payment}/recibo', [SaleDocumentController::class, 'paymentReceipt'])->name('sales.payments.receipt');
 Route::get('/creditos', [SaleController::class, 'credits'])->name('credits.index');
 Route::delete('/salidas/{stockOutput}', [StockOutputController::class, 'destroyOwn'])
     ->name('stock-outputs.employee-destroy')

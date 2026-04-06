@@ -41,7 +41,7 @@ class SalePaymentController extends Controller
                 return ['ok' => false, 'message' => 'Ingrese la próxima fecha prometida si queda saldo pendiente.'];
             }
 
-            $sale->payments()->create([
+            $payment = $sale->payments()->create([
                 'amount' => $this->centsToMoney($amountCents),
                 'paid_at' => now(),
             ]);
@@ -52,7 +52,7 @@ class SalePaymentController extends Controller
                 $sale->update(['due_date' => $validated['next_due_date'] ?? $sale->due_date]);
             }
 
-            return ['ok' => true];
+            return ['ok' => true, 'paymentId' => $payment->id];
         });
 
         if (! $result['ok']) {
@@ -61,7 +61,8 @@ class SalePaymentController extends Controller
 
         return redirect()
             ->route('sales.show', $sale)
-            ->with('status', 'Pago registrado correctamente.');
+            ->with('status', 'Pago registrado correctamente.')
+            ->with('receipt_payment_id', $result['paymentId'] ?? null);
     }
 
     private function moneyToCents(mixed $value): int

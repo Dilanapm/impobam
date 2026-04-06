@@ -22,6 +22,16 @@
             margin-top: 2px;
         }
 
+        .company {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .company .company-name {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
         .box {
             border: 1px solid #000;
             padding: 10px;
@@ -75,6 +85,16 @@
     @php
         $formatCents = fn (int $cents) => number_format($cents / 100, 2, '.', '');
     @endphp
+
+    <div class="company">
+        <div>Empresa unipersonal</div>
+        <div class="company-name">IMPORTADOR BAM</div>
+        <div>De: Brian Apolaca Marino Telefono: 73066403</div>
+        <div><strong>CASA MATRIZ</strong></div>
+        <div>Calle Victoria Nro 1753</div>
+        <div>El Alto - Bolivia</div>
+        <div>NIT: 8341114016</div>
+    </div>
 
     <h1>Reporte de pagos pendientes</h1>
     <div class="meta">Generado: {{ $generatedAt->format('d/m/Y H:i') }}</div>

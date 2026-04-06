@@ -22,6 +22,16 @@
             margin-top: 2px;
         }
 
+        .company {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .company .company-name {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
         .box {
             border: 1px solid #000;
             padding: 10px;
@@ -68,6 +78,16 @@
 </head>
 
 <body>
+    <div class="company">
+        <div>Empresa unipersonal</div>
+        <div class="company-name">IMPORTADOR BAM</div>
+        <div>De: Brian Apolaca Marino Telefono: 73066403</div>
+        <div><strong>CASA MATRIZ</strong></div>
+        <div>Calle Victoria Nro 1753</div>
+        <div>El Alto - Bolivia</div>
+        <div>NIT: 8341114016</div>
+    </div>
+
     <h1>Reporte de salidas</h1>
     <div class="meta">Generado: {{ $generatedAt->format('d/m/Y H:i') }}</div>
     <div class="meta">Periodo: {{ $range['label'] }} ({{ $range['start']->format('d/m/Y') }} - {{ $range['end']->format('d/m/Y') }})</div>

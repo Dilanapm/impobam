@@ -32,12 +32,36 @@
                 </div>
             @endif
 
+            @if (session('receipt_payment_id'))
+                <div
+                    class="mt-4 rounded-2xl border border-warning-border bg-warning-soft px-4 py-4 text-lg font-medium leading-relaxed text-warning sm:text-xl">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            Recibo del pago listo para descargar.
+                        </div>
+                        <a href="{{ route('sales.payments.receipt', ['sale' => $sale, 'payment' => session('receipt_payment_id')]) }}"
+                            class="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-2xl bg-warning px-5 py-3 text-lg font-bold text-warning-foreground transition hover:bg-warning-hover">
+                            <span class="text-2xl">📄</span>
+                            <span>Recibo (PDF)</span>
+                        </a>
+                    </div>
+                </div>
+            @endif
+
             <div class="mt-5 flex justify-end">
-                <a href="{{ route('home') }}"
-                    class="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-2xl bg-muted px-5 py-3 text-lg font-bold text-foreground transition hover:bg-border">
-                    <span class="text-2xl">🏠</span>
-                    <span>Inicio</span>
-                </a>
+                <div class="flex flex-col gap-3 sm:flex-row">
+                    <a href="{{ route('sales.note', $sale) }}"
+                        class="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-2xl bg-primary px-5 py-3 text-lg font-bold text-primary-foreground transition hover:bg-primary-hover">
+                        <span class="text-2xl">📄</span>
+                        <span>Nota de venta (PDF)</span>
+                    </a>
+
+                    <a href="{{ route('home') }}"
+                        class="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-2xl bg-muted px-5 py-3 text-lg font-bold text-foreground transition hover:bg-border">
+                        <span class="text-2xl">🏠</span>
+                        <span>Inicio</span>
+                    </a>
+                </div>
             </div>
 
         </div>
@@ -172,6 +196,10 @@
                     <h2 class="text-2xl font-extrabold text-foreground sm:text-3xl">Registrar pago</h2>
                     <p class="mt-1 text-lg text-foreground-muted sm:text-xl">
                         Si el pago no completa el total, ingrese la próxima fecha prometida.
+                    </p>
+                    <p class="mt-2 text-lg font-semibold text-foreground sm:text-xl">
+                        Saldo actual:
+                        <span class="text-2xl font-extrabold">{{ $formatCents($balanceCents) }}</span>
                     </p>
                 </div>
             </div>
