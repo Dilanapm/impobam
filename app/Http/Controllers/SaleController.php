@@ -25,6 +25,7 @@ class SaleController extends Controller
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'max:150'],
             'delivery_location' => ['nullable', 'string', 'max:255'],
+            'payment_type' => ['nullable', 'in:cash,credit'],
             'due_date' => ['nullable', 'date', 'after_or_equal:' . now()->toDateString()],
             'initial_payment_amount' => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(?:[\.,]\d{1,2})?$/'],
             'items' => ['required', 'array', 'min:1'],
@@ -61,7 +62,10 @@ class SaleController extends Controller
                 ->withErrors(['items' => 'La venta debe tener un total mayor a 0.']);
         }
 
-        $initialPaymentCents = $this->moneyToCents($validated['initial_payment_amount'] ?? 0);
+        $paymentType = $validated['payment_type'] ?? null;
+        $initialPaymentCents = $paymentType === 'cash'
+            ? $totalCents
+            : $this->moneyToCents($validated['initial_payment_amount'] ?? 0);
 
         if ($initialPaymentCents > $totalCents) {
             return back()
@@ -69,17 +73,21 @@ class SaleController extends Controller
                 ->withErrors(['initial_payment_amount' => 'El pago inicial no puede ser mayor al total.']);
         }
 
-        if ($initialPaymentCents > 0 && $initialPaymentCents < $totalCents && empty($validated['due_date'])) {
+        if ($paymentType !== 'cash' && $initialPaymentCents > 0 && $initialPaymentCents < $totalCents && empty($validated['due_date'])) {
             return back()
                 ->withInput()
                 ->withErrors(['due_date' => 'Ingrese una fecha prometida si queda saldo pendiente y hubo un pago inicial.']);
         }
 
-        $sale = DB::transaction(function () use ($validated, $normalizedItems, $totalCents, $initialPaymentCents) {
+        $sale = DB::transaction(function () use ($validated, $normalizedItems, $totalCents, $initialPaymentCents, $paymentType) {
+            $dueDate = $paymentType === 'cash'
+                ? null
+                : ($validated['due_date'] ?? null);
+
             $sale = Sale::create([
                 'customer_name' => $validated['customer_name'],
                 'delivery_location' => $validated['delivery_location'] ?? null,
-                'due_date' => $validated['due_date'] ?? null,
+                'due_date' => $dueDate,
                 'total_amount' => $this->centsToMoney($totalCents),
             ]);
 

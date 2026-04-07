@@ -486,6 +486,7 @@ new class extends Component
 
         <input type="hidden" name="_guided_mode" value="{{ $guided_mode ? '1' : '0' }}">
         <input type="hidden" name="_guided_step" value="{{ $guided_step }}">
+        <input type="hidden" name="payment_type" value="{{ $payment_type ?? '' }}">
 
         <div class="grid grid-cols-1 gap-5 {{ $guided_mode ? '' : 'md:grid-cols-2' }}">
             <div @if($guided_mode && $guided_step !== 1) hidden @endif>
@@ -628,33 +629,35 @@ new class extends Component
                 @enderror
             </div>
 
-            <div class="mt-5 grid grid-cols-1 gap-5 {{ $guided_mode ? '' : 'md:grid-cols-2' }}" @if($guided_mode && !in_array($guided_step, [5, 6], true)) hidden @endif>
-                <div @if($guided_mode && $guided_step !== 5) hidden @endif>
-                    <label for="initial_payment_amount" class="mb-3 flex items-center gap-2 text-xl font-bold text-foreground sm:text-2xl">
-                        <span class="text-2xl">💳</span>
-                        <span>Pago inicial <span class="font-normal text-foreground-muted">(opcional)</span></span>
-                    </label>
-                    <input type="number" name="initial_payment_amount" id="initial_payment_amount" min="0" step="0.01"
-                        wire:model.live.debounce.250ms="initial_payment_amount" placeholder="Ejemplo: 100"
-                        class="min-h-[64px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-3 text-lg text-foreground shadow-sm outline-none transition focus:border-success focus:ring-4 focus:ring-success/20 sm:text-xl">
-                    @error('initial_payment_amount')
-                        <div class="mt-2 text-lg font-medium text-danger" data-validation-error>⚠️ {{ $message }}</div>
-                    @enderror
-                </div>
+            @if ($payment_type !== 'cash')
+                <div class="mt-5 grid grid-cols-1 gap-5 {{ $guided_mode ? '' : 'md:grid-cols-2' }}" @if($guided_mode && !in_array($guided_step, [5, 6], true)) hidden @endif>
+                    <div @if($guided_mode && $guided_step !== 5) hidden @endif>
+                        <label for="initial_payment_amount" class="mb-3 flex items-center gap-2 text-xl font-bold text-foreground sm:text-2xl">
+                            <span class="text-2xl">💳</span>
+                            <span>Pago inicial <span class="font-normal text-foreground-muted">(opcional)</span></span>
+                        </label>
+                        <input type="number" name="initial_payment_amount" id="initial_payment_amount" min="0" step="0.01"
+                            wire:model.live.debounce.250ms="initial_payment_amount" placeholder="Ejemplo: 100"
+                            class="min-h-[64px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-3 text-lg text-foreground shadow-sm outline-none transition focus:border-success focus:ring-4 focus:ring-success/20 sm:text-xl">
+                        @error('initial_payment_amount')
+                            <div class="mt-2 text-lg font-medium text-danger" data-validation-error>⚠️ {{ $message }}</div>
+                        @enderror
+                    </div>
 
-                <div @if($guided_mode && $guided_step !== 6) hidden @endif>
-                    <label for="due_date" class="mb-3 flex items-center gap-2 text-xl font-bold text-foreground sm:text-2xl">
-                        <span class="text-2xl">📅</span>
-                        <span>Fecha prometida <span class="font-normal text-foreground-muted">(si queda saldo y hubo pago)</span></span>
-                    </label>
-                    <input type="date" name="due_date" id="due_date" min="{{ now()->toDateString() }}"
-                        wire:model.defer="due_date" @required($this->dueDateRequired())
-                        class="min-h-[64px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-3 text-lg text-foreground shadow-sm outline-none transition focus:border-success focus:ring-4 focus:ring-success/20 sm:text-xl">
-                    @error('due_date')
-                        <div class="mt-2 text-lg font-medium text-danger" data-validation-error>⚠️ {{ $message }}</div>
-                    @enderror
+                    <div @if($guided_mode && $guided_step !== 6) hidden @endif>
+                        <label for="due_date" class="mb-3 flex items-center gap-2 text-xl font-bold text-foreground sm:text-2xl">
+                            <span class="text-2xl">📅</span>
+                            <span>Fecha prometida <span class="font-normal text-foreground-muted">(si queda saldo y hubo pago)</span></span>
+                        </label>
+                        <input type="date" name="due_date" id="due_date" min="{{ now()->toDateString() }}"
+                            wire:model.defer="due_date" @required($this->dueDateRequired())
+                            class="min-h-[64px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-3 text-lg text-foreground shadow-sm outline-none transition focus:border-success focus:ring-4 focus:ring-success/20 sm:text-xl">
+                        @error('due_date')
+                            <div class="mt-2 text-lg font-medium text-danger" data-validation-error>⚠️ {{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
-            </div>
+            @endif
 
             <div class="mt-5 rounded-2xl border border-border bg-surface p-4">
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
