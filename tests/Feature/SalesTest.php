@@ -11,6 +11,11 @@ class SalesTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_sale_create_page_renders(): void
+    {
+        $this->get('/ventas')->assertOk();
+    }
+
     public function test_sale_can_be_created_with_multiple_products_and_initial_payment(): void
     {
         $productA = Product::create(['name' => 'Producto A', 'is_active' => true]);

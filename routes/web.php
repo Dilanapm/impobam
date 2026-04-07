@@ -5,11 +5,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StockOutputController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SaleDocumentController;
 use App\Http\Controllers\SalePaymentController;
 
-Route::view('/', 'home')->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/salidas', [StockOutputController::class, 'create'])->name('stock-outputs.create');
 Route::post('/salidas', [StockOutputController::class, 'store'])->name('stock-outputs.store');

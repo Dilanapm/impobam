@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
 use App\Models\Sale;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,11 +13,7 @@ class SaleController extends Controller
 {
     public function create(): View
     {
-        $products = Product::where('is_active', true)
-            ->orderBy('name')
-            ->get();
-
-        return view('sales.create', compact('products'));
+        return view('sales.create');
     }
 
     public function credits(): View
