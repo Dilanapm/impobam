@@ -51,10 +51,8 @@ new class extends Component
 
         $oldItems = old('items');
 
-        if (! is_array($oldItems) || count($oldItems) === 0) {
-            $oldItems = [
-                ['product_id' => '', 'quantity' => 1, 'unit_price' => ''],
-            ];
+        if (! is_array($oldItems)) {
+            $oldItems = [];
         }
 
         $this->items = array_values(array_map(function ($item) {
@@ -99,12 +97,16 @@ new class extends Component
 
     public function removeItem(int $index): void
     {
-        if (count($this->items) <= 1) {
+        if (! array_key_exists($index, $this->items)) {
             return;
         }
 
         unset($this->items[$index]);
         $this->items = array_values($this->items);
+
+        if ($this->payment_type === 'cash' && $this->auto_cash_filled) {
+            $this->initial_payment_amount = $this->formatCents($this->totalCents());
+        }
 
         if (! $this->payment_type_locked) {
             $this->inferPaymentType();
@@ -529,63 +531,69 @@ new class extends Component
                 </button>
             </div>
 
-            <div class="mt-6 space-y-4">
-                @foreach ($items as $index => $item)
-                    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm" wire:key="sale-item-{{ $item['key'] ?? $index }}">
-                        <div class="grid grid-cols-1 gap-4 md:grid-cols-12">
-                            <div class="md:col-span-5">
-                                <label class="mb-2 block text-sm font-bold uppercase tracking-wide text-foreground-muted">🧴 Producto</label>
-                                <select name="items[{{ $index }}][product_id]" required
-                                    wire:model.live="items.{{ $index }}.product_id"
-                                    class="min-h-[56px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-3 text-lg text-foreground shadow-sm outline-none transition focus:border-success focus:ring-4 focus:ring-success/20">
-                                    <option value="">Seleccione un producto</option>
-                                    @foreach ($products as $product)
-                                        <option value="{{ $product['id'] }}">{{ $product['name'] }}</option>
-                                    @endforeach
-                                </select>
-                                @error("items.$index.product_id")
-                                    <div class="mt-2 text-lg font-medium text-danger" data-validation-error>⚠️ {{ $message }}</div>
-                                @enderror
-                            </div>
+            @if (count($items) === 0)
+                <div class="mt-6 rounded-2xl border border-border bg-surface p-4 text-lg text-foreground-muted sm:text-xl">
+                    No hay productos agregados. Use <span class="font-bold text-foreground">“Agregar producto”</span> para comenzar.
+                </div>
+            @else
+                <div class="mt-6 space-y-4">
+                    @foreach ($items as $index => $item)
+                        <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm" wire:key="sale-item-{{ $item['key'] ?? $index }}">
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-12">
+                                <div class="md:col-span-5">
+                                    <label class="mb-2 block text-sm font-bold uppercase tracking-wide text-foreground-muted">🧴 Producto</label>
+                                    <select name="items[{{ $index }}][product_id]" required
+                                        wire:model.live="items.{{ $index }}.product_id"
+                                        class="min-h-[56px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-3 text-lg text-foreground shadow-sm outline-none transition focus:border-success focus:ring-4 focus:ring-success/20">
+                                        <option value="">Seleccione un producto</option>
+                                        @foreach ($products as $product)
+                                            <option value="{{ $product['id'] }}">{{ $product['name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error("items.$index.product_id")
+                                        <div class="mt-2 text-lg font-medium text-danger" data-validation-error>⚠️ {{ $message }}</div>
+                                    @enderror
+                                </div>
 
-                            <div class="md:col-span-2">
-                                <label class="mb-2 block text-sm font-bold uppercase tracking-wide text-foreground-muted">🔢 Cantidad</label>
-                                <input type="number" name="items[{{ $index }}][quantity]" min="1" required
-                                    wire:model.live.debounce.250ms="items.{{ $index }}.quantity"
-                                    class="min-h-[56px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-3 text-lg text-foreground shadow-sm outline-none transition focus:border-success focus:ring-4 focus:ring-success/20">
-                                @error("items.$index.quantity")
-                                    <div class="mt-2 text-lg font-medium text-danger" data-validation-error>⚠️ {{ $message }}</div>
-                                @enderror
-                            </div>
+                                <div class="md:col-span-2">
+                                    <label class="mb-2 block text-sm font-bold uppercase tracking-wide text-foreground-muted">🔢 Cantidad</label>
+                                    <input type="number" name="items[{{ $index }}][quantity]" min="1" required
+                                        wire:model.live.debounce.250ms="items.{{ $index }}.quantity"
+                                        class="min-h-[56px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-3 text-lg text-foreground shadow-sm outline-none transition focus:border-success focus:ring-4 focus:ring-success/20">
+                                    @error("items.$index.quantity")
+                                        <div class="mt-2 text-lg font-medium text-danger" data-validation-error>⚠️ {{ $message }}</div>
+                                    @enderror
+                                </div>
 
-                            <div class="md:col-span-3">
-                                <label class="mb-2 block text-sm font-bold uppercase tracking-wide text-foreground-muted">💵 Precio</label>
-                                <input type="number" name="items[{{ $index }}][unit_price]" min="0" step="0.01" required
-                                    wire:model.live.debounce.250ms="items.{{ $index }}.unit_price"
-                                    class="min-h-[56px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-3 text-lg text-foreground shadow-sm outline-none transition focus:border-success focus:ring-4 focus:ring-success/20">
-                                @error("items.$index.unit_price")
-                                    <div class="mt-2 text-lg font-medium text-danger" data-validation-error>⚠️ {{ $message }}</div>
-                                @enderror
-                            </div>
+                                <div class="md:col-span-3">
+                                    <label class="mb-2 block text-sm font-bold uppercase tracking-wide text-foreground-muted">💵 Precio</label>
+                                    <input type="number" name="items[{{ $index }}][unit_price]" min="0" step="0.01" required
+                                        wire:model.live.debounce.250ms="items.{{ $index }}.unit_price"
+                                        class="min-h-[56px] w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-3 text-lg text-foreground shadow-sm outline-none transition focus:border-success focus:ring-4 focus:ring-success/20">
+                                    @error("items.$index.unit_price")
+                                        <div class="mt-2 text-lg font-medium text-danger" data-validation-error>⚠️ {{ $message }}</div>
+                                    @enderror
+                                </div>
 
-                            <div class="md:col-span-2">
-                                <label class="mb-2 block text-sm font-bold uppercase tracking-wide text-foreground-muted">🧮 Subtotal</label>
-                                <div class="flex min-h-[56px] items-center rounded-2xl border border-border bg-muted px-4 text-lg font-bold text-foreground">
-                                    {{ $formatCents($this->lineTotalCents($index)) }}
+                                <div class="md:col-span-2">
+                                    <label class="mb-2 block text-sm font-bold uppercase tracking-wide text-foreground-muted">🧮 Subtotal</label>
+                                    <div class="flex min-h-[56px] items-center rounded-2xl border border-border bg-muted px-4 text-lg font-bold text-foreground">
+                                        {{ $formatCents($this->lineTotalCents($index)) }}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="mt-4 flex justify-end">
-                            <button type="button" wire:click="removeItem({{ $index }})" @disabled(count($items) <= 1)
-                                class="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-2xl bg-danger px-5 py-3 text-lg font-bold text-danger-foreground transition hover:bg-danger-hover disabled:opacity-60">
-                                <span class="text-2xl">🗑️</span>
-                                <span>Quitar</span>
-                            </button>
+                            <div class="mt-4 flex justify-end">
+                                <button type="button" wire:click="removeItem({{ $index }})"
+                                    class="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-2xl bg-danger px-5 py-3 text-lg font-bold text-danger-foreground transition hover:bg-danger-hover">
+                                    <span class="text-2xl">🗑️</span>
+                                    <span>Quitar</span>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                @endforeach
-            </div>
+                    @endforeach
+                </div>
+            @endif
 
             @error('items')
                 <div class="mt-4 text-lg font-medium text-danger" data-validation-error>⚠️ {{ $message }}</div>
