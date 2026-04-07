@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Sale;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -18,38 +17,7 @@ class SaleController extends Controller
 
     public function credits(): View
     {
-        $pendingSales = [];
-        $creditsLoadError = null;
-
-        try {
-            $sales = Sale::query()
-                ->select(['id', 'customer_name', 'delivery_location', 'due_date', 'total_amount', 'created_at'])
-                ->withSum('payments', 'amount')
-                ->orderBy('due_date')
-                ->orderByDesc('id')
-                ->get();
-
-            foreach ($sales as $sale) {
-                $totalCents = $this->moneyToCents($sale->total_amount);
-                $paidCents = $this->moneyToCents($sale->payments_sum_amount ?? 0);
-                $balanceCents = max($totalCents - $paidCents, 0);
-
-                if ($balanceCents <= 0) {
-                    continue;
-                }
-
-                $pendingSales[] = [
-                    'sale' => $sale,
-                    'totalCents' => $totalCents,
-                    'paidCents' => $paidCents,
-                    'balanceCents' => $balanceCents,
-                ];
-            }
-        } catch (QueryException) {
-            $creditsLoadError = 'No se pudieron cargar los créditos. Revise la conexión a la base de datos y ejecute las migraciones si es un servidor nuevo.';
-        }
-
-        return view('credits.index', compact('pendingSales', 'creditsLoadError'));
+        return view('credits.index');
     }
 
     public function store(Request $request): RedirectResponse
@@ -136,12 +104,14 @@ class SaleController extends Controller
             ->with('status', 'Venta registrada correctamente.');
     }
 
-    public function show(Sale $sale): View
+    public function show(Request $request, Sale $sale): View
     {
         $sale->load([
             'items.product',
             'payments' => fn ($query) => $query->orderByDesc('paid_at')->orderByDesc('id'),
         ]);
+
+        $paymentOnly = $request->boolean('payment_only');
 
         $totalCents = $this->moneyToCents($sale->total_amount);
         $paidCents = 0;
@@ -152,7 +122,7 @@ class SaleController extends Controller
 
         $balanceCents = max($totalCents - $paidCents, 0);
 
-        return view('sales.show', compact('sale', 'totalCents', 'paidCents', 'balanceCents'));
+        return view('sales.show', compact('sale', 'totalCents', 'paidCents', 'balanceCents', 'paymentOnly'));
     }
 
     private function moneyToCents(mixed $value): int

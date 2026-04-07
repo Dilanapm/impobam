@@ -20,7 +20,7 @@
                         Venta #{{ $sale->id }}
                     </h1>
                     <p class="mt-2 text-lg leading-relaxed text-foreground-muted sm:text-xl">
-                        Detalle de la venta y registro de pagos.
+                        {{ $paymentOnly ? 'Registrar pago de la venta seleccionada.' : 'Detalle de la venta y registro de pagos.' }}
                     </p>
                 </div>
             </div>
@@ -50,11 +50,21 @@
 
             <div class="mt-5 flex justify-end">
                 <div class="flex flex-col gap-3 sm:flex-row">
-                    <a href="{{ route('sales.note', $sale) }}"
-                        class="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-2xl bg-primary px-5 py-3 text-lg font-bold text-primary-foreground transition hover:bg-primary-hover">
-                        <span class="text-2xl">📄</span>
-                        <span>Nota de venta (PDF)</span>
-                    </a>
+                    @if (! $paymentOnly)
+                        <a href="{{ route('sales.note', $sale) }}"
+                            class="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-2xl bg-primary px-5 py-3 text-lg font-bold text-primary-foreground transition hover:bg-primary-hover">
+                            <span class="text-2xl">📄</span>
+                            <span>Nota de venta (PDF)</span>
+                        </a>
+                    @endif
+
+                    @if ($paymentOnly)
+                        <a href="{{ route('credits.index') }}"
+                            class="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-2xl bg-warning px-5 py-3 text-lg font-bold text-warning-foreground transition hover:bg-warning-hover">
+                            <span class="text-2xl">🔎</span>
+                            <span>Volver a búsqueda</span>
+                        </a>
+                    @endif
 
                     <a href="{{ route('home') }}"
                         class="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-2xl bg-muted px-5 py-3 text-lg font-bold text-foreground transition hover:bg-border">
@@ -70,8 +80,9 @@
             $formatCents = fn(int $cents) => number_format($cents / 100, 2, '.', '');
         @endphp
 
-        <div class="mt-5 rounded-3xl bg-surface p-4 shadow-lg sm:p-6">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        @if (! $paymentOnly)
+            <div class="mt-5 rounded-3xl bg-surface p-4 shadow-lg sm:p-6">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                     <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">👤 Cliente</span>
                     <span class="text-lg font-medium text-foreground sm:text-xl">
@@ -114,19 +125,19 @@
                     <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">⏳ Saldo</span>
                     <span class="text-3xl font-extrabold text-foreground">{{ $formatCents($balanceCents) }}</span>
                 </div>
+                </div>
             </div>
-        </div>
 
-        <div class="mt-5 rounded-3xl bg-surface p-4 shadow-lg sm:p-6">
-            <div class="flex items-center gap-3">
+            <div class="mt-5 rounded-3xl bg-surface p-4 shadow-lg sm:p-6">
+                <div class="flex items-center gap-3">
                 <span class="text-3xl">🧺</span>
                 <div>
                     <h2 class="text-2xl font-extrabold text-foreground sm:text-3xl">Productos</h2>
                     <p class="mt-1 text-lg text-foreground-muted sm:text-xl">Detalle por ítem.</p>
                 </div>
-            </div>
+                </div>
 
-            <div class="mt-5 space-y-4">
+                <div class="mt-5 space-y-4">
                 @foreach ($sale->items as $item)
                     <div class="rounded-2xl border border-border bg-muted p-4 shadow-sm">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -151,19 +162,19 @@
                         </div>
                     </div>
                 @endforeach
+                </div>
             </div>
-        </div>
 
-        <div class="mt-5 rounded-3xl bg-surface p-4 shadow-lg sm:p-6">
-            <div class="flex items-center gap-3">
+            <div class="mt-5 rounded-3xl bg-surface p-4 shadow-lg sm:p-6">
+                <div class="flex items-center gap-3">
                 <span class="text-3xl">🧾</span>
                 <div>
                     <h2 class="text-2xl font-extrabold text-foreground sm:text-3xl">Pagos</h2>
                     <p class="mt-1 text-lg text-foreground-muted sm:text-xl">Historial de pagos registrados.</p>
                 </div>
-            </div>
+                </div>
 
-            <div class="mt-5 space-y-4">
+                <div class="mt-5 space-y-4">
                 @forelse ($sale->payments as $payment)
                     <div class="rounded-2xl border border-border bg-muted p-4 shadow-sm">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -186,8 +197,9 @@
                         Aún no hay pagos registrados.
                     </div>
                 @endforelse
+                </div>
             </div>
-        </div>
+        @endif
 
         <div class="mt-5 rounded-3xl bg-surface p-4 shadow-lg sm:p-6 md:p-8">
             <div class="flex items-center gap-3">
@@ -211,6 +223,7 @@
             @else
                 <form method="POST" action="{{ route('sales.payments.store', $sale) }}" class="mt-6 space-y-6" novalidate>
                     @csrf
+                    <input type="hidden" name="payment_only" value="{{ $paymentOnly ? '1' : '0' }}">
 
                     <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                         <div>

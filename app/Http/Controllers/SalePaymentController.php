@@ -11,6 +11,8 @@ class SalePaymentController extends Controller
 {
     public function store(Request $request, Sale $sale): RedirectResponse
     {
+        $paymentOnly = $request->boolean('payment_only');
+
         $validated = $request->validate([
             'amount' => ['required', 'numeric', 'min:0.01', 'regex:/^\d+(?:[\.,]\d{1,2})?$/'],
             'next_due_date' => ['nullable', 'date', 'after_or_equal:' . now()->toDateString()],
@@ -60,7 +62,10 @@ class SalePaymentController extends Controller
         }
 
         return redirect()
-            ->route('sales.show', $sale)
+            ->route('sales.show', array_filter([
+                'sale' => $sale,
+                'payment_only' => $paymentOnly ? 1 : null,
+            ], static fn ($value) => $value !== null))
             ->with('status', 'Pago registrado correctamente.')
             ->with('receipt_payment_id', $result['paymentId'] ?? null);
     }
