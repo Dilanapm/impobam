@@ -32,6 +32,7 @@ new class extends Component
     public bool $auto_cash_filled = false;
     public bool $payment_type_locked = false;
     public bool $show_item_added_notice = false;
+    public ?string $new_item_highlight_key = null;
 
     public function mount(): void
     {
@@ -90,8 +91,12 @@ new class extends Component
 
     public function addItem(): void
     {
-        array_unshift($this->items, ['key' => (string) Str::uuid(), 'product_id' => '', 'quantity' => 1, 'unit_price' => '']);
+        $newItemKey = (string) Str::uuid();
+
+        array_unshift($this->items, ['key' => $newItemKey, 'product_id' => '', 'quantity' => 1, 'unit_price' => '']);
         $this->show_item_added_notice = true;
+        $this->new_item_highlight_key = $newItemKey;
+        $this->dispatch('sale-item-added', key: $newItemKey);
 
         if (! $this->payment_type_locked) {
             $this->inferPaymentType();
@@ -101,6 +106,11 @@ new class extends Component
     public function clearItemAddedNotice(): void
     {
         $this->show_item_added_notice = false;
+    }
+
+    public function clearNewItemHighlight(): void
+    {
+        $this->new_item_highlight_key = null;
     }
 
     public function removeItem(int $index): void
@@ -541,10 +551,22 @@ new class extends Component
             </div>
 
             @if ($show_item_added_notice)
-                <div wire:poll.3s="clearItemAddedNotice"
-                    class="mt-4 rounded-2xl border border-success-border bg-success-soft px-4 py-3 text-lg font-medium text-success sm:text-xl">
-                    ✅ Se agregó un nuevo producto para llenar.
+                <div class="pointer-events-none fixed right-4 top-4 z-50 w-[min(92vw,28rem)]">
+                    <div wire:poll.2s="clearItemAddedNotice"
+                        class="pointer-events-auto rounded-3xl border border-success-border bg-success p-4 text-success-foreground shadow-2xl sm:p-5">
+                        <div class="flex items-start gap-3">
+                            <span class="text-3xl">✅</span>
+                            <div>
+                                <h4 class="text-lg font-extrabold text-success-foreground sm:text-xl">Producto agregado</h4>
+                                <p class="mt-1 text-base text-success-foreground sm:text-lg">Se agregó un nuevo producto para llenar.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            @endif
+
+            @if ($new_item_highlight_key)
+                <div wire:poll.2s="clearNewItemHighlight" class="hidden"></div>
             @endif
 
             @if (count($items) === 0)
@@ -560,11 +582,14 @@ new class extends Component
                             $unitPriceRaw = trim((string) ($item['unit_price'] ?? ''));
                             $unitPriceCents = $this->moneyToCents($unitPriceRaw);
                             $itemCompleted = $productSelected && $quantityValue >= 1 && $unitPriceRaw !== '' && $unitPriceCents > 0;
+                            $itemKey = (string) ($item['key'] ?? '');
+                            $isNewItem = $itemKey !== '' && $itemKey === $new_item_highlight_key;
                         @endphp
 
                         <div
                             wire:key="sale-item-{{ $item['key'] ?? $index }}"
-                            class="rounded-2xl border p-4 shadow-sm {{ $itemCompleted ? 'border-success-border bg-success-soft' : 'border-border bg-surface' }}"
+                            id="sale-item-{{ $itemKey !== '' ? $itemKey : $index }}"
+                            class="rounded-2xl border p-4 shadow-sm transition-all {{ $itemCompleted ? 'border-success-border bg-success-soft' : 'border-border bg-surface' }} {{ $isNewItem ? 'ring-2 ring-success/50 animate-pulse shadow-[0_0_0_6px_rgba(34,197,94,0.18)]' : '' }}"
                         >
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-12">
                                 <div class="md:col-span-5">
@@ -625,6 +650,11 @@ new class extends Component
             @error('items')
                 <div class="mt-4 text-lg font-medium text-danger" data-validation-error>⚠️ {{ $message }}</div>
             @enderror
+
+            <div class="mt-4 rounded-2xl border border-border bg-surface p-4">
+                <span class="mb-1 block text-sm font-bold uppercase tracking-wide text-foreground-muted">🧾 Total de productos</span>
+                <span class="text-2xl font-extrabold text-foreground">{{ $formatCents($totalCents) }}</span>
+            </div>
         </div>
 
         <div class="rounded-3xl border border-border bg-muted p-4 sm:p-6" @if($guided_mode && $guided_step < 4) hidden @endif>
@@ -728,4 +758,32 @@ new class extends Component
             <span>Guardar venta</span>
         </button>
     </form>
+
+    @once
+        <script>
+            document.addEventListener('livewire:init', () => {
+                Livewire.on('sale-item-added', (payload) => {
+                    const key = payload?.key;
+
+                    if (!key) {
+                        return;
+                    }
+
+                    const target = document.getElementById(`sale-item-${key}`);
+
+                    if (!target) {
+                        return;
+                    }
+
+                    requestAnimationFrame(() => {
+                        const topOffset = 140;
+                        const targetTop = target.getBoundingClientRect().top + window.scrollY;
+                        const scrollTop = Math.max(targetTop - topOffset, 0);
+
+                        window.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                    });
+                });
+            });
+        </script>
+    @endonce
 </div>
