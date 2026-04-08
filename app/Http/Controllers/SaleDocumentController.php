@@ -124,7 +124,7 @@ class SaleDocumentController extends Controller
     {
         $width = 1400;
         $margin = 60;
-        $font = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
+        $font = $this->resolveFontPath();
 
         $headerHeight = 190;
         $infoBoxHeight = 285;
@@ -328,6 +328,23 @@ class SaleDocumentController extends Controller
         return function_exists('imagettftext')
             && function_exists('imagettfbbox')
             && is_file($fontFile);
+    }
+
+    private function resolveFontPath(): string
+    {
+        $candidates = [
+            storage_path('fonts/DejaVuSans.ttf'),
+            base_path('vendor/dompdf/dompdf/lib/fonts/DejaVuSans.ttf'),
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+        ];
+
+        foreach ($candidates as $path) {
+            if (is_file($path) && is_readable($path)) {
+                return $path;
+            }
+        }
+
+        return '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
     }
 
     private function builtinFontForSize(int $fontSize): int
