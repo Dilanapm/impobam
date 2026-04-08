@@ -7,6 +7,7 @@ use App\Models\SalePayment;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Throwable;
 
 class SaleDocumentController extends Controller
 {
@@ -27,6 +28,10 @@ class SaleDocumentController extends Controller
 
     public function saleNoteImage(Sale $sale): Response
     {
+        if (! function_exists('imagecreatetruecolor') || ! function_exists('imagepng')) {
+            return $this->saleNote($sale);
+        }
+
         [$sale, $totalCents, $paidCents, $balanceCents, $generatedAt] = $this->loadSaleTotals($sale);
 
         $items = $sale->items->map(function ($item) {
@@ -38,12 +43,16 @@ class SaleDocumentController extends Controller
             ];
         })->all();
 
-        $image = $this->buildSaleNoteImage($sale, $items, $totalCents, $paidCents, $balanceCents, $generatedAt);
+        try {
+            $image = $this->buildSaleNoteImage($sale, $items, $totalCents, $paidCents, $balanceCents, $generatedAt);
 
-        ob_start();
-        imagepng($image);
-        $png = ob_get_clean();
-        imagedestroy($image);
+            ob_start();
+            imagepng($image);
+            $png = ob_get_clean();
+            imagedestroy($image);
+        } catch (Throwable) {
+            return $this->saleNote($sale);
+        }
 
         return response($png, 200, [
             'Content-Type' => 'image/png',
@@ -282,22 +291,60 @@ class SaleDocumentController extends Controller
 
     private function textWidth(string $text, int $fontSize, string $fontFile): int
     {
-        $box = imagettfbbox($fontSize, 0, $fontFile, $this->encodeForTtf($text));
+        if ($this->canUseTtf($fontFile)) {
+            $box = imagettfbbox($fontSize, 0, $fontFile, $this->encodeForTtf($text));
 
-        return abs($box[2] - $box[0]);
+            return abs($box[2] - $box[0]);
+        }
+
+        return max(strlen($text), 1) * 8;
     }
 
     private function drawText($image, int $fontSize, int $x, int $y, int $color, string $text, string $fontFile, bool $utf8 = false): void
     {
-        $text = $utf8 ? $this->encodeForTtf($text) : $text;
-        imagettftext($image, $fontSize, 0, $x, $y, $color, $fontFile, $text);
+        if ($this->canUseTtf($fontFile)) {
+            $text = $utf8 ? $this->encodeForTtf($text) : $text;
+            imagettftext($image, $fontSize, 0, $x, $y, $color, $fontFile, $text);
+            return;
+        }
+
+        $builtinFont = $this->builtinFontForSize($fontSize);
+        imagestring($image, $builtinFont, $x, max($y - (imagefontheight($builtinFont) + 2), 0), $text, $color);
     }
 
     private function encodeForTtf(string $text): string
     {
+        if (! function_exists('iconv')) {
+            return $text;
+        }
+
         $converted = @iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $text);
 
         return $converted !== false ? $converted : $text;
+    }
+
+    private function canUseTtf(string $fontFile): bool
+    {
+        return function_exists('imagettftext')
+            && function_exists('imagettfbbox')
+            && is_file($fontFile);
+    }
+
+    private function builtinFontForSize(int $fontSize): int
+    {
+        if ($fontSize >= 20) {
+            return 5;
+        }
+
+        if ($fontSize >= 16) {
+            return 4;
+        }
+
+        if ($fontSize >= 13) {
+            return 3;
+        }
+
+        return 2;
     }
 
     private function moneyFormat(int $cents): string
