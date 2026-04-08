@@ -31,11 +31,13 @@ new class extends Component
     public ?string $payment_type = null;
     public bool $auto_cash_filled = false;
     public bool $payment_type_locked = false;
+    public bool $show_item_added_notice = false;
 
     public function mount(): void
     {
         $this->products = Product::query()
             ->where('is_active', true)
+            ->whereRaw('LOWER(name) != ?', ['ballerina acondicionador'])
             ->orderBy('name')
             ->get(['id', 'name'])
             ->map(fn (Product $product) => [
@@ -88,11 +90,17 @@ new class extends Component
 
     public function addItem(): void
     {
-        $this->items[] = ['key' => (string) Str::uuid(), 'product_id' => '', 'quantity' => 1, 'unit_price' => ''];
+        array_unshift($this->items, ['key' => (string) Str::uuid(), 'product_id' => '', 'quantity' => 1, 'unit_price' => '']);
+        $this->show_item_added_notice = true;
 
         if (! $this->payment_type_locked) {
             $this->inferPaymentType();
         }
+    }
+
+    public function clearItemAddedNotice(): void
+    {
+        $this->show_item_added_notice = false;
     }
 
     public function removeItem(int $index): void
@@ -532,6 +540,13 @@ new class extends Component
                 </button>
             </div>
 
+            @if ($show_item_added_notice)
+                <div wire:poll.3s="clearItemAddedNotice"
+                    class="mt-4 rounded-2xl border border-success-border bg-success-soft px-4 py-3 text-lg font-medium text-success sm:text-xl">
+                    ✅ Se agregó un nuevo producto para llenar.
+                </div>
+            @endif
+
             @if (count($items) === 0)
                 <div class="mt-6 rounded-2xl border border-border bg-surface p-4 text-lg text-foreground-muted sm:text-xl">
                     No hay productos agregados. Use <span class="font-bold text-foreground">“Agregar producto”</span> para comenzar.
@@ -539,7 +554,18 @@ new class extends Component
             @else
                 <div class="mt-6 space-y-4">
                     @foreach ($items as $index => $item)
-                        <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm" wire:key="sale-item-{{ $item['key'] ?? $index }}">
+                        @php
+                            $productSelected = trim((string) ($item['product_id'] ?? '')) !== '';
+                            $quantityValue = (int) ($item['quantity'] ?? 0);
+                            $unitPriceRaw = trim((string) ($item['unit_price'] ?? ''));
+                            $unitPriceCents = $this->moneyToCents($unitPriceRaw);
+                            $itemCompleted = $productSelected && $quantityValue >= 1 && $unitPriceRaw !== '' && $unitPriceCents > 0;
+                        @endphp
+
+                        <div
+                            wire:key="sale-item-{{ $item['key'] ?? $index }}"
+                            class="rounded-2xl border p-4 shadow-sm {{ $itemCompleted ? 'border-success-border bg-success-soft' : 'border-border bg-surface' }}"
+                        >
                             <div class="grid grid-cols-1 gap-4 md:grid-cols-12">
                                 <div class="md:col-span-5">
                                     <label class="mb-2 block text-sm font-bold uppercase tracking-wide text-foreground-muted">🧴 Producto</label>

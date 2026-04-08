@@ -19,6 +19,7 @@ class DashboardController extends Controller
         $endDate = $request->input('end_date');
 
         $products = Product::where('is_active', true)
+            ->whereRaw('LOWER(name) != ?', ['ballerina acondicionador'])
             ->orderBy('name')
             ->get();
 

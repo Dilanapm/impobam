@@ -13,6 +13,7 @@ class StockOutputController extends Controller
     public function create(): View
     {
         $products = Product::where('is_active', true)
+            ->whereRaw('LOWER(name) != ?', ['ballerina acondicionador'])
             ->orderBy('name')
             ->get();
 
