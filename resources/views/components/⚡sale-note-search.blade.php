@@ -96,11 +96,19 @@ new class extends Component
                                     </div>
                                 </div>
 
-                                <a href="{{ route('sales.note', $sale['id']) }}"
-                                    class="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-2xl bg-primary px-5 py-3 text-lg font-bold text-primary-foreground transition hover:bg-primary-hover">
-                                    <span class="text-2xl">⬇️</span>
-                                    <span>Nota (PDF)</span>
-                                </a>
+                                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    <a href="{{ route('sales.note', $sale['id']) }}"
+                                        class="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-2xl bg-primary px-5 py-3 text-lg font-bold text-primary-foreground transition hover:bg-primary-hover">
+                                        <span class="text-2xl">⬇️</span>
+                                        <span>Nota (PDF)</span>
+                                    </a>
+
+                                    <a href="{{ route('sales.note.image', $sale['id']) }}"
+                                        class="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-2xl bg-success px-5 py-3 text-lg font-bold text-success-foreground transition hover:bg-success-hover">
+                                        <span class="text-2xl">🖼️</span>
+                                        <span>Nota (Imagen)</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     @empty
