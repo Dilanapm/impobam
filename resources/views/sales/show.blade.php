@@ -56,6 +56,12 @@
                             <span class="text-2xl">📄</span>
                             <span>Nota de venta (PDF)</span>
                         </a>
+
+                        <a href="{{ route('sales.note.image', $sale) }}"
+                            class="inline-flex min-h-[56px] items-center justify-center gap-3 rounded-2xl bg-success px-5 py-3 text-lg font-bold text-success-foreground transition hover:bg-success-hover">
+                            <span class="text-2xl">🖼️</span>
+                            <span>Nota de venta (Imagen)</span>
+                        </a>
                     @endif
 
                     @if ($paymentOnly)

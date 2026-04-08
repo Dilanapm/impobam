@@ -18,6 +18,7 @@ Route::get('/ventas', [SaleController::class, 'create'])->name('sales.create');
 Route::post('/ventas', [SaleController::class, 'store'])->name('sales.store');
 Route::get('/ventas/{sale}', [SaleController::class, 'show'])->name('sales.show');
 Route::get('/ventas/{sale}/nota', [SaleDocumentController::class, 'saleNote'])->name('sales.note');
+Route::get('/ventas/{sale}/nota/imagen', [SaleDocumentController::class, 'saleNoteImage'])->name('sales.note.image');
 Route::post('/ventas/{sale}/pagos', [SalePaymentController::class, 'store'])->name('sales.payments.store');
 Route::get('/ventas/{sale}/pagos/{payment}/recibo', [SaleDocumentController::class, 'paymentReceipt'])->name('sales.payments.receipt');
 Route::get('/creditos', [SaleController::class, 'credits'])->name('credits.index');
