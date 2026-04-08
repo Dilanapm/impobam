@@ -29,6 +29,59 @@ Route::delete('/salidas/{stockOutput}', [StockOutputController::class, 'destroyO
 Route::middleware('auth')->group(function () {
    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+   Route::get('/dashboard/diag/image-support', function () {
+       $fontPath = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
+
+       $gdInfo = function_exists('gd_info') ? gd_info() : null;
+       $canUseTtf = function_exists('imagettftext')
+           && function_exists('imagettfbbox')
+           && is_file($fontPath);
+
+       $smoke = null;
+
+       try {
+           if (function_exists('imagecreatetruecolor') && function_exists('imagepng')) {
+               $img = imagecreatetruecolor(40, 20);
+               $bg = imagecolorallocate($img, 255, 255, 255);
+               imagefill($img, 0, 0, $bg);
+
+               if ($canUseTtf) {
+                   $black = imagecolorallocate($img, 0, 0, 0);
+                   imagettftext($img, 10, 0, 2, 14, $black, $fontPath, 'OK');
+               }
+
+               ob_start();
+               imagepng($img);
+               $raw = ob_get_clean();
+               imagedestroy($img);
+
+               $smoke = is_string($raw) && strlen($raw) > 0;
+           }
+       } catch (Throwable) {
+           $smoke = false;
+       }
+
+       return response()->json([
+           'php' => PHP_VERSION,
+           'gd_extension_loaded' => extension_loaded('gd'),
+           'gd_info' => $gdInfo,
+           'functions' => [
+               'imagecreatetruecolor' => function_exists('imagecreatetruecolor'),
+               'imagepng' => function_exists('imagepng'),
+               'imagettftext' => function_exists('imagettftext'),
+               'imagettfbbox' => function_exists('imagettfbbox'),
+               'iconv' => function_exists('iconv'),
+           ],
+           'font' => [
+               'path' => $fontPath,
+               'exists' => is_file($fontPath),
+               'readable' => is_readable($fontPath),
+           ],
+           'can_use_ttf' => $canUseTtf,
+           'png_smoke_test_ok' => $smoke,
+       ]);
+   })->name('admin.diag.image-support');
+
    Route::get('/dashboard/reportes/ventas', [ReportController::class, 'sales'])
        ->name('admin.reports.sales');
    Route::get('/dashboard/reportes/salidas', [ReportController::class, 'outputs'])
