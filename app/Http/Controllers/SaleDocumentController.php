@@ -67,20 +67,7 @@ class SaleDocumentController extends Controller
             abort(404);
         }
 
-        $sale->load([
-            'items.product',
-            'payments' => fn ($query) => $query->orderByDesc('paid_at')->orderByDesc('id'),
-        ]);
-
-        $totalCents = $this->moneyToCents($sale->total_amount);
-        $paidCents = 0;
-
-        foreach ($sale->payments as $row) {
-            $paidCents += $this->moneyToCents($row->amount);
-        }
-
-        $balanceCents = max($totalCents - $paidCents, 0);
-        $generatedAt = now();
+        [$sale, $payment, $totalCents, $paidCents, $balanceCents, $generatedAt] = $this->loadPaymentReceiptTotals($sale, $payment);
 
         $pdf = Pdf::loadView('sales.documents.payment-receipt', [
             'sale' => $sale,
@@ -92,6 +79,36 @@ class SaleDocumentController extends Controller
         ])->setPaper('a4', 'portrait');
 
         return $pdf->download('recibo-pago-venta-' . $sale->id . '-pago-' . $payment->id . '-' . $generatedAt->format('Y-m-d') . '.pdf');
+    }
+
+    public function paymentReceiptImage(Sale $sale, SalePayment $payment): Response
+    {
+        if ((int) $payment->sale_id !== (int) $sale->id) {
+            abort(404);
+        }
+
+        if (! function_exists('imagecreatetruecolor') || ! function_exists('imagepng')) {
+            return $this->paymentReceipt($sale, $payment);
+        }
+
+        [$sale, $payment, $totalCents, $paidCents, $balanceCents, $generatedAt] = $this->loadPaymentReceiptTotals($sale, $payment);
+
+        try {
+            $image = $this->buildPaymentReceiptImage($sale, $payment, $totalCents, $paidCents, $balanceCents, $generatedAt);
+
+            ob_start();
+            imagepng($image);
+            $png = ob_get_clean();
+            imagedestroy($image);
+        } catch (Throwable) {
+            return $this->paymentReceipt($sale, $payment);
+        }
+
+        return response($png, 200, [
+            'Content-Type' => 'image/png',
+            'Content-Disposition' => 'attachment; filename="recibo-pago-venta-' . $sale->id . '-pago-' . $payment->id . '-' . $generatedAt->format('Y-m-d') . '.png"',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+        ]);
     }
 
     /**
@@ -256,6 +273,110 @@ class SaleDocumentController extends Controller
         $this->drawText($image, 13, $margin, $imageHeight - 28, $muted, 'Esta nota es informativa.', $font, true);
 
         return $image;
+    }
+
+    private function buildPaymentReceiptImage(Sale $sale, SalePayment $payment, int $totalCents, int $paidCents, int $balanceCents, $generatedAt)
+    {
+        $width = 1300;
+        $height = 980;
+        $margin = 58;
+        $font = $this->resolveFontPath();
+
+        $image = imagecreatetruecolor($width, $height);
+
+        $white = imagecolorallocate($image, 255, 255, 255);
+        $blue = imagecolorallocate($image, 147, 197, 253);
+        $blueSoft = imagecolorallocate($image, 239, 246, 255);
+        $blueMuted = imagecolorallocate($image, 224, 242, 254);
+        $border = imagecolorallocate($image, 191, 219, 254);
+        $text = imagecolorallocate($image, 30, 41, 59);
+        $muted = imagecolorallocate($image, 71, 85, 105);
+        $accent = imagecolorallocate($image, 14, 116, 144);
+
+        imagefill($image, 0, 0, $white);
+
+        imagefilledrectangle($image, 0, 0, $width, 190, $blue);
+        $this->drawText($image, 28, $margin, 52, $text, 'IMPORTADOR BAM', $font, true);
+        $this->drawText($image, 15, $margin, 82, $text, 'Empresa unipersonal', $font, true);
+        $this->drawText($image, 15, $margin, 108, $text, 'De: Brian Apolaca Marino  Telefono: 73066403', $font, true);
+        $this->drawText($image, 15, $margin, 134, $text, 'CASA MATRIZ - Calle Victoria Nro 1753 - El Alto - Bolivia', $font, true);
+        $this->drawText($image, 15, $margin, 160, $text, 'NIT: 8341114016', $font, true);
+
+        $titleY = 230;
+        $this->drawText($image, 32, $margin, $titleY, $text, 'Recibo de pago', $font, true);
+        $this->drawText($image, 14, $margin, $titleY + 34, $muted, 'Generado: ' . $generatedAt->format('d/m/Y H:i'), $font, true);
+
+        $boxTop = 286;
+        $boxBottom = 610;
+        imagefilledrectangle($image, $margin, $boxTop, $width - $margin, $boxBottom, $blueSoft);
+        imagerectangle($image, $margin, $boxTop, $width - $margin, $boxBottom, $border);
+
+        $leftX = $margin + 26;
+        $rightX = $margin + 680;
+
+        $this->drawText($image, 15, $leftX, $boxTop + 46, $muted, 'Venta', $font, true);
+        $this->drawText($image, 22, $leftX, $boxTop + 82, $text, '#' . $sale->id, $font, true);
+
+        $this->drawText($image, 15, $rightX, $boxTop + 46, $muted, 'Cliente', $font, true);
+        $this->drawText($image, 22, $rightX, $boxTop + 82, $text, $sale->customer_name, $font, true);
+
+        $this->drawText($image, 15, $leftX, $boxTop + 146, $muted, 'Pago', $font, true);
+        $this->drawText($image, 22, $leftX, $boxTop + 182, $text, '#' . $payment->id, $font, true);
+
+        $this->drawText($image, 15, $rightX, $boxTop + 146, $muted, 'Fecha de pago', $font, true);
+        $this->drawText($image, 22, $rightX, $boxTop + 182, $text, $payment->paid_at?->format('d/m/Y H:i') ?? '—', $font, true);
+
+        $this->drawText($image, 15, $leftX, $boxTop + 246, $muted, 'Monto pagado', $font, true);
+        $this->drawText($image, 24, $leftX, $boxTop + 284, $accent, (string) $payment->amount, $font, true);
+
+        $this->drawText($image, 15, $rightX, $boxTop + 246, $muted, 'Proxima promesa', $font, true);
+        $this->drawText($image, 22, $rightX, $boxTop + 282, $text, $sale->due_date?->format('d/m/Y') ?? '—', $font, true);
+
+        $totalsTop = 646;
+        $totalsBottom = 860;
+        imagefilledrectangle($image, $margin, $totalsTop, $width - $margin, $totalsBottom, $blueMuted);
+        imagerectangle($image, $margin, $totalsTop, $width - $margin, $totalsBottom, $border);
+
+        $this->drawText($image, 24, $margin + 20, $totalsTop + 40, $text, 'Resumen de saldos', $font, true);
+
+        $rowY = $totalsTop + 88;
+        $this->drawText($image, 18, $margin + 24, $rowY, $text, 'Total venta', $font, true);
+        $this->drawText($image, 18, $width - $margin - 210, $rowY, $text, $this->moneyFormat($totalCents), $font, true);
+
+        $rowY += 44;
+        $this->drawText($image, 18, $margin + 24, $rowY, $text, 'Total pagado', $font, true);
+        $this->drawText($image, 18, $width - $margin - 210, $rowY, $text, $this->moneyFormat($paidCents), $font, true);
+
+        $rowY += 44;
+        $this->drawText($image, 18, $margin + 24, $rowY, $text, 'Saldo', $font, true);
+        $this->drawText($image, 18, $width - $margin - 210, $rowY, $text, $this->moneyFormat($balanceCents), $font, true);
+
+        $this->drawText($image, 14, $margin, $height - 28, $muted, 'Este recibo confirma el registro del pago en sistema.', $font, true);
+
+        return $image;
+    }
+
+    /**
+     * @return array{0: Sale, 1: SalePayment, 2: int, 3: int, 4: int, 5: \Illuminate\Support\Carbon}
+     */
+    private function loadPaymentReceiptTotals(Sale $sale, SalePayment $payment): array
+    {
+        $sale->load([
+            'items.product',
+            'payments' => fn ($query) => $query->orderByDesc('paid_at')->orderByDesc('id'),
+        ]);
+
+        $totalCents = $this->moneyToCents($sale->total_amount);
+        $paidCents = 0;
+
+        foreach ($sale->payments as $row) {
+            $paidCents += $this->moneyToCents($row->amount);
+        }
+
+        $balanceCents = max($totalCents - $paidCents, 0);
+        $generatedAt = now();
+
+        return [$sale, $payment, $totalCents, $paidCents, $balanceCents, $generatedAt];
     }
 
     /**

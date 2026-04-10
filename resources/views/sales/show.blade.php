@@ -39,11 +39,18 @@
                         <div>
                             Recibo del pago listo para descargar.
                         </div>
-                        <a href="{{ route('sales.payments.receipt', ['sale' => $sale, 'payment' => session('receipt_payment_id')]) }}"
-                            class="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-2xl bg-warning px-5 py-3 text-lg font-bold text-warning-foreground transition hover:bg-warning-hover">
-                            <span class="text-2xl">📄</span>
-                            <span>Recibo (PDF)</span>
-                        </a>
+                        <div class="flex flex-col gap-2 sm:flex-row">
+                            <a href="{{ route('sales.payments.receipt', ['sale' => $sale, 'payment' => session('receipt_payment_id')]) }}"
+                                class="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-2xl bg-warning px-5 py-3 text-lg font-bold text-warning-foreground transition hover:bg-warning-hover">
+                                <span class="text-2xl">📄</span>
+                                <span>Recibo (PDF)</span>
+                            </a>
+                            <a href="{{ route('sales.payments.receipt.image', ['sale' => $sale, 'payment' => session('receipt_payment_id')]) }}"
+                                class="inline-flex min-h-[52px] items-center justify-center gap-3 rounded-2xl bg-primary px-5 py-3 text-lg font-bold text-primary-foreground transition hover:bg-primary-hover">
+                                <span class="text-2xl">🖼️</span>
+                                <span>Recibo (Imagen)</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             @endif
@@ -196,6 +203,18 @@
                                     {{ $payment->amount }}
                                 </span>
                             </div>
+                        </div>
+                        <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                            <a href="{{ route('sales.payments.receipt', ['sale' => $sale, 'payment' => $payment]) }}"
+                                class="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-warning px-4 py-2 text-base font-bold text-warning-foreground transition hover:bg-warning-hover">
+                                <span>📄</span>
+                                <span>Recibo PDF</span>
+                            </a>
+                            <a href="{{ route('sales.payments.receipt.image', ['sale' => $sale, 'payment' => $payment]) }}"
+                                class="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-base font-bold text-primary-foreground transition hover:bg-primary-hover">
+                                <span>🖼️</span>
+                                <span>Recibo Imagen</span>
+                            </a>
                         </div>
                     </div>
                 @empty

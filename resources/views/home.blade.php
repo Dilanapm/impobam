@@ -38,7 +38,8 @@
         </div>
 
         @php
-            $openSales = trim((string) request()->query('sale_note_query', '')) !== '';
+            $openSales = trim((string) request()->query('sale_note_query', '')) !== ''
+                || trim((string) request()->query('payment_receipt_query', '')) !== '';
         @endphp
 
         <div class="mt-5 space-y-4">
@@ -109,12 +110,28 @@
                             <div>
                                 <h3 class="text-xl font-extrabold text-foreground sm:text-2xl">Generar nota de venta</h3>
                                 <p class="mt-1 text-lg leading-relaxed text-foreground-muted sm:text-xl">
-                                    Busque una venta ya registrada por cliente y descargue la nota en PDF.
+                                    Busque una venta ya registrada por cliente y descargue la nota en PDF o imagen.
                                 </p>
                             </div>
                         </div>
 
                         <livewire:sale-note-search />
+                    </div>
+
+                    <div class="mt-4 rounded-3xl border border-border bg-muted p-5 shadow-sm sm:p-6">
+                        <div class="flex items-start gap-4">
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-3xl">
+                                🧾
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-extrabold text-foreground sm:text-2xl">Generar recibo de pago</h3>
+                                <p class="mt-1 text-lg leading-relaxed text-foreground-muted sm:text-xl">
+                                    Busque un cliente con pagos registrados y descargue el recibo.
+                                </p>
+                            </div>
+                        </div>
+
+                        <livewire:payment-receipt-search />
                     </div>
                 </div>
             </details>

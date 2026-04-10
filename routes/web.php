@@ -21,6 +21,7 @@ Route::get('/ventas/{sale}/nota', [SaleDocumentController::class, 'saleNote'])->
 Route::get('/ventas/{sale}/nota/imagen', [SaleDocumentController::class, 'saleNoteImage'])->name('sales.note.image');
 Route::post('/ventas/{sale}/pagos', [SalePaymentController::class, 'store'])->name('sales.payments.store');
 Route::get('/ventas/{sale}/pagos/{payment}/recibo', [SaleDocumentController::class, 'paymentReceipt'])->name('sales.payments.receipt');
+Route::get('/ventas/{sale}/pagos/{payment}/recibo/imagen', [SaleDocumentController::class, 'paymentReceiptImage'])->name('sales.payments.receipt.image');
 Route::get('/creditos', [SaleController::class, 'credits'])->name('credits.index');
 Route::delete('/salidas/{stockOutput}', [StockOutputController::class, 'destroyOwn'])
     ->name('stock-outputs.employee-destroy')
